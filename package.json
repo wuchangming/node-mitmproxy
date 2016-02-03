@@ -4,14 +4,14 @@
   "description": "Node.js MITM Proxy",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./test/constructor.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wuchangming/node-mitmproxy.git"
   },
   "keywords": [
-    "MIMT",
+    "MITM",
     "proxy",
     "Node"
   ],
@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/wuchangming/node-mitmproxy/issues"
   },
-  "homepage": "https://github.com/wuchangming/node-mitmproxy#readme"
+  "homepage": "https://github.com/wuchangming/node-mitmproxy#readme",
+  "dependencies": {
+    "co": "^4.6.0"
+  }
 }
