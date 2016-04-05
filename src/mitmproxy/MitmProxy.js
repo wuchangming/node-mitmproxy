@@ -148,7 +148,6 @@ module.exports = class MitmProxy {
         // tunneling https
         var proxySocket = net.connect(port, hostname, () => {
             cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
-            'Proxy-agent: node-mitmproxy\r\n' +
             '\r\n');
             proxySocket.write(head);
             proxySocket.pipe(cltSocket);
