@@ -1,2 +1,5 @@
-var Mitmproxy = require('../index.js');
-var proxy = new Mitmproxy();
+var Mitmproxy = require('../lib');
+var proxy = new Mitmproxy({
+    isSSL: true,
+    connectInterceptor: function() {return true;}
+});
