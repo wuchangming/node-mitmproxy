@@ -14,8 +14,9 @@ utils.createCA = function (CN) {
     cert.publicKey = keys.publicKey;
     cert.serialNumber = (new Date()).getTime() + '';
     cert.validity.notBefore = new Date();
+    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() - 5);
     cert.validity.notAfter = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 3);
+    cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 20);
     var attrs = [{
         name: 'commonName',
         value: CN
@@ -45,10 +46,10 @@ utils.createCA = function (CN) {
         name: 'keyUsage',
         critical: true,
         keyCertSign: true,
-        digitalSignature: true,
-        nonRepudiation: true,
-        keyEncipherment: true,
-        dataEncipherment: true
+        // digitalSignature: true,
+        // nonRepudiation: true,
+        // keyEncipherment: true,
+        // dataEncipherment: true
     },{
         name: 'subjectKeyIdentifier'
     }]);
@@ -76,8 +77,9 @@ utils.createFakeCertificateByCA = function (caKey, caCert, originCertificate) {
 
     cert.serialNumber = certificate.serialNumber;
     cert.validity.notBefore = new Date();
+    cert.validity.notBefore.setFullYear(cert.validity.notBefore.getFullYear() - 1);
     cert.validity.notAfter = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+    cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 1);
 
     cert.setSubject(certificate.subject.attributes);
     cert.setIssuer(caCert.subject.attributes);
@@ -91,11 +93,28 @@ utils.createFakeCertificateByCA = function (caKey, caCert, originCertificate) {
         cA: false
     },
     {
+        name: 'keyUsage',
+        critical: true,
+        // keyCertSign: true,
+        digitalSignature: true,
+        // nonRepudiation: true,
+        keyEncipherment: true
+        // dataEncipherment: true
+    },
+    {
         name: 'subjectAltName',
         altNames: subjectAltName.altNames
     },
     {
         name: 'subjectKeyIdentifier'
+    },
+    {
+        name: 'extKeyUsage',
+        serverAuth: true,
+        clientAuth: true
+    },
+    {
+        name:'authorityKeyIdentifier'
     }]);
     cert.sign(caKey, forge.md.sha256.create());
 
