@@ -65,7 +65,7 @@ module.exports = class FakeServersCenter {
     }
     getServer (hostname, port, callBack) {
         var serverObj = null;
-        for (let i = 0; i < this.queue; i++) {
+        for (let i = 0; i < this.queue.length; i++) {
             serverObj = this.queue[i];
             let mappingHostNames = serverObj.mappingHostNames;
             for (let j = 0; j < mappingHostNames.length; j++) {
@@ -100,7 +100,6 @@ module.exports = class FakeServersCenter {
                     preRes.socket.end();
                     preReq.end();
                     this.addServer(certObj, (serverObj) => {
-                        // console.log(serverObj);
                         callBack(serverObj);
                         return;
                     });

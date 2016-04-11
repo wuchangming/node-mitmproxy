@@ -23,7 +23,7 @@ module.exports = class CertAndKeyContainer {
         return certObj;
     }
     getCert (hostname) {
-        for (let i = 0; i < this.queue; i++) {
+        for (let i = 0; i < this.queue.length; i++) {
             let certObj = this.queue[i];
             let mappingHostNames = certObj.mappingHostNames;
             for (let j = 0; j < mappingHostNames.length; j++) {

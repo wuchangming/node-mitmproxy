@@ -125,9 +125,9 @@ module.exports = class MitmProxy {
         var protocol = isHttps?'https:':'http:';
         var rOptions = {
             protocol: protocol,
-            hostname: urlObject.hostname || req.headers.host,
+            hostname: req.headers.host.split(':')[0],
             method: req.method,
-            port: urlObject.port || defaultPort,
+            port: req.headers.host.split(':')[1] || defaultPort,
             path: urlObject.path,
             headers: req.headers
         }

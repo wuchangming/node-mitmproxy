@@ -140,6 +140,6 @@ utils.getMappingHostNamesFormCert = function (cert) {
     var mappingHostNames = [];
     mappingHostNames.push(cert.subject.getField('CN') ? cert.subject.getField('CN').value : '');
     var altNames = cert.getExtension('subjectAltName') ? cert.getExtension('subjectAltName').altNames : [];
-    mappingHostNames.concat(_.map(altNames, 'value'));
+    mappingHostNames = mappingHostNames.concat(_.map(altNames, 'value'));
     return mappingHostNames;
 }
