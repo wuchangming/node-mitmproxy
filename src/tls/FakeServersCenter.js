@@ -65,19 +65,21 @@ module.exports = class FakeServersCenter {
     }
     getServer (hostname, port, callBack) {
         var serverObj = null;
+        var rServerObj = null;
         for (let i = 0; i < this.queue.length; i++) {
             serverObj = this.queue[i];
             let mappingHostNames = serverObj.mappingHostNames;
             for (let j = 0; j < mappingHostNames.length; j++) {
                 let DNSName = mappingHostNames[j];
                 if (tlsUtils.isMappingHostName(DNSName, hostname)) {
+                    rServerObj = serverObj;
                     this.reRankServer(i);
                     callBack(serverObj);
                     return;
                 }
             }
         }
-        if (!serverObj) {
+        if (!rServerObj) {
             var certObj = this.certAndKeyContainer.getCert();
             if (certObj) {
                 var serverObj = this.addServer({
@@ -105,7 +107,7 @@ module.exports = class FakeServersCenter {
                     });
                 });
                 preReq.on('error', (e) => {
-                    console.log(e);
+                    console.log(port, hostname, e);
                 })
                 preReq.end();
             }

@@ -136,6 +136,7 @@ module.exports = class MitmProxy {
     __connectHandler(req, cltSocket, head) {
 
         var srvUrl = url.parse(`https://${req.url}`);
+        console.log(srvUrl);
         if (this.isSSL && this.connectInterceptor(req, cltSocket, head)) {
             this.fakeServersCenter.getServer(srvUrl.hostname, srvUrl.port , (serverObj) => {
                 this.__proxyConnect(req, cltSocket, head, localIP, serverObj.port);
