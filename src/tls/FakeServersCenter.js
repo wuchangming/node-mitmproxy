@@ -94,7 +94,7 @@ module.exports = class FakeServersCenter {
                     port: port,
                     hostname: hostname,
                     path: '/',
-                    method: 'GET'
+                    method: 'HEAD'
                 }, (preRes) => {
                     var realCert  = preRes.socket.getPeerCertificate();
                     var certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
