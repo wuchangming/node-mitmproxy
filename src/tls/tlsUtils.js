@@ -45,11 +45,7 @@ utils.createCA = function (CN) {
     }, {
         name: 'keyUsage',
         critical: true,
-        keyCertSign: true,
-        // digitalSignature: true,
-        // nonRepudiation: true,
-        // keyEncipherment: true,
-        // dataEncipherment: true
+        keyCertSign: true
     },{
         name: 'subjectKeyIdentifier'
     }]);
@@ -95,11 +91,8 @@ utils.createFakeCertificateByCA = function (caKey, caCert, originCertificate) {
     {
         name: 'keyUsage',
         critical: true,
-        // keyCertSign: true,
         digitalSignature: true,
-        // nonRepudiation: true,
         keyEncipherment: true
-        // dataEncipherment: true
     },
     {
         name: 'subjectAltName',

@@ -29,7 +29,7 @@ var nope = function () {
 module.exports = class MitmProxy {
     constructor({port = 6789,
         CAPath = config.getDefaultCABasePath(),
-        isSSL = false,
+        ssl = false,
         preInterceptor = nope,
         postInterceptor = nope,
         connectInterceptor = nope,
@@ -39,13 +39,13 @@ module.exports = class MitmProxy {
         this.preInterceptor = preInterceptor;
         this.postInterceptor = postInterceptor;
         this.connectInterceptor = connectInterceptor;
-        this.isSSL = isSSL;
+        this.ssl = ssl;
 
         // if (ssl) {
         this.__initCA(caBasePath);
         // }
 
-        if (this.isSSL) {
+        if (this.ssl) {
             this.fakeServersCenter = new FakeServersCenter({
                 caCert: this.caCert,
                 caKey: this.caKey,
@@ -137,7 +137,7 @@ module.exports = class MitmProxy {
 
         var srvUrl = url.parse(`https://${req.url}`);
         console.log(srvUrl);
-        if (this.isSSL && this.connectInterceptor(req, cltSocket, head)) {
+        if (this.ssl && this.connectInterceptor(req, cltSocket, head)) {
             this.fakeServersCenter.getServer(srvUrl.hostname, srvUrl.port , (serverObj) => {
                 this.__proxyConnect(req, cltSocket, head, localIP, serverObj.port);
             });

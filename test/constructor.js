@@ -1,5 +1,5 @@
 var Mitmproxy = require('../lib');
 var proxy = new Mitmproxy({
-    isSSL: true,
+    ssl: true,
     connectInterceptor: function() {return true;}
 });
