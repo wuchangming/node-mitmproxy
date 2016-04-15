@@ -32,13 +32,13 @@ module.exports = class MitmProxy {
         ssl = false,
         preInterceptor = nope,
         postInterceptor = nope,
-        connectInterceptor = nope,
+        sslConnectInterceptor = nope,
         caBasePath
     }){
 
         this.preInterceptor = preInterceptor;
         this.postInterceptor = postInterceptor;
-        this.connectInterceptor = connectInterceptor;
+        this.sslConnectInterceptor = sslConnectInterceptor;
         this.ssl = ssl;
 
         // if (ssl) {
@@ -137,7 +137,7 @@ module.exports = class MitmProxy {
 
         var srvUrl = url.parse(`https://${req.url}`);
         console.log(srvUrl);
-        if (this.ssl && this.connectInterceptor(req, cltSocket, head)) {
+        if (this.ssl && this.sslConnectInterceptor(req, cltSocket, head)) {
             this.fakeServersCenter.getServer(srvUrl.hostname, srvUrl.port , (serverObj) => {
                 this.__proxyConnect(req, cltSocket, head, localIP, serverObj.port);
             });

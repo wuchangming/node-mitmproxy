@@ -1,7 +1,7 @@
 const path = require('path');
 
 var config = exports;
-config.caCertFileName = 'node-mitmproxy.ca.pem';
+config.caCertFileName = 'node-mitmproxy.ca.crt';
 
 config.caKeyFileName = 'node-mitmproxy.ca.key.pem';
 
