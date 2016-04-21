@@ -10,10 +10,10 @@ const FakeServersCenter = require('../tls/FakeServersCenter');
 const domain = require('domain');
 const fs = require('fs');
 const mkdirp = require('mkdirp');
+const colors = require('colors');
 
 
 var pki = forge.pki;
-var logColor = config.logColor;
 
 const localIP = '127.0.0.1';
 
@@ -59,9 +59,9 @@ module.exports = class MitmProxy {
 
         var server = new http.Server();
         server.listen(port, () => {
-            console.log(logColor.FgGreen + '%s' + logColor.Reset, `node-mitmproxy启动端口: ${port}`);
+            console.log(colors.green(`node-mitmproxy启动端口: ${port}`));
             server.on('error', (e) => {
-                console.error(e);
+                console.error(colors.red(e));
             });
             server.on('request', (req, res) => {
                 d.run(() => {
@@ -101,12 +101,12 @@ module.exports = class MitmProxy {
 
                 fs.writeFile(caCertPath, certPem, (err) => {
                     if (err) throw err;
-                    console.log(`CA Cert saved in: ${caCertPath}`);
+                    console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
                 });
 
                 fs.writeFile(caKeyPath, keyPem, (err) => {
                     if (err) throw err;
-                    console.log(`CA private key saved in: ${caKeyPath}`);
+                    console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
                 });
             });
 
@@ -136,7 +136,7 @@ module.exports = class MitmProxy {
     __connectHandler(req, cltSocket, head) {
 
         var srvUrl = url.parse(`https://${req.url}`);
-        console.log(srvUrl);
+        console.log('connect to', colors.yellow(srvUrl.host));
         if (this.ssl && this.sslConnectInterceptor(req, cltSocket, head)) {
             this.fakeServersCenter.getServer(srvUrl.hostname, srvUrl.port , (serverObj) => {
                 this.__proxyConnect(req, cltSocket, head, localIP, serverObj.port);
@@ -155,7 +155,7 @@ module.exports = class MitmProxy {
             cltSocket.pipe(proxySocket);
         });
         proxySocket.on('error', (e) => {
-            console.log(hostname, port, e);
+            console.log(colors.red(hostname), colors.red(port), colors.red(e));
         });
         return proxySocket;
     }

@@ -11,9 +11,3 @@ config.getDefaultCABasePath = function () {
     var userHome = process.env.HOME || process.env.USERPROFILE;
     return path.resolve(userHome, './node-mitmproxy');
 }
-// console log 颜色
-config.logColor = {
-    FgRed: "\x1b[31m",
-    FgGreen: "\x1b[32m",
-    Reset: "\x1b[0m"
-}
