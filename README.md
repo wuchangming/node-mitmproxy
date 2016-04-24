@@ -25,3 +25,7 @@ Node.js MITM proxy
 ```
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/node-mitmproxy/node-mitmproxy.ca.crt
 ```
+#### windows
+```
+start %HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
+```
