@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../common/config');
 const _ = require('lodash');
+const mkdirp = require('mkdirp');
+const colors = require('colors');
 
 var utils = exports;
 var pki = forge.pki;
@@ -145,4 +147,45 @@ utils.getMappingHostNamesFormCert = function (cert) {
     var altNames = cert.getExtension('subjectAltName') ? cert.getExtension('subjectAltName').altNames : [];
     mappingHostNames = mappingHostNames.concat(_.map(altNames, 'value'));
     return mappingHostNames;
+}
+
+utils.initCA =  function (basePath = config.getDefaultCABasePath()) {
+    var caCertPath = path.resolve(basePath, config.caCertFileName);
+    var caKeyPath = path.resolve(basePath, config.caKeyFileName);
+    try {
+        fs.accessSync(caCertPath, fs.F_OK);
+        fs.accessSync(caKeyPath, fs.F_OK);
+        var caCertPem = fs.readFileSync(caCertPath);
+        var caKeyPem = fs.readFileSync(caKeyPath);
+        this.caCert = forge.pki.certificateFromPem(caCertPem);
+        this.caKey = forge.pki.privateKeyFromPem(caKeyPem);
+
+        console.log(colors.cyan(`证书已经存在： ${basePath}`));
+        // has exist
+    } catch (e) {
+        var caObj = utils.createCA(config.caName);
+        this.caCert = caObj.cert;
+        this.cakey = caObj.key;
+        var certPem = pki.certificateToPem(this.caCert);
+
+        var keyPem = pki.privateKeyToPem(this.cakey);
+
+        mkdirp(path.dirname(caCertPath), function (err) {
+            if (err) {
+                console.error(err);
+                return;
+            }
+
+            fs.writeFile(caCertPath, certPem, (err) => {
+                if (err) throw err;
+                console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
+            });
+
+            fs.writeFile(caKeyPath, keyPem, (err) => {
+                if (err) throw err;
+                console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
+            });
+        });
+
+    }
 }

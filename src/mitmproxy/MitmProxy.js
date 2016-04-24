@@ -89,27 +89,8 @@ module.exports = class MitmProxy {
             this.caKey = forge.pki.privateKeyFromPem(caKeyPem);
             // has exist
         } catch (e) {
-            var caObj = tlsUtils.createCA(config.caName);
-            this.caCert = caObj.cert;
-            this.cakey = caObj.key;
-            var certPem = pki.certificateToPem(this.caCert);
-
-            var keyPem = pki.privateKeyToPem(this.cakey);
-
-            mkdirp(path.dirname(caCertPath), function (err) {
-                if (err) return cb(err);
-
-                fs.writeFile(caCertPath, certPem, (err) => {
-                    if (err) throw err;
-                    console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
-                });
-
-                fs.writeFile(caKeyPath, keyPem, (err) => {
-                    if (err) throw err;
-                    console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
-                });
-            });
-
+            console.log(colors.red(`先执行命令：${colors.green('node-mitmproxy createCA')} 生成CA证书`));
+            process.exit(1);
         }
     }
     __requestHandler (req, res, isHttps) {

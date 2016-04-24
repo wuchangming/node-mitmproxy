@@ -1,8 +1,9 @@
 {
   "name": "node-mitmproxy",
-  "version": "0.0.5",
+  "version": "0.0.10",
   "description": "Node.js MITM Proxy",
-  "main": "index.js",
+  "main": "lib",
+  "bin":"lib/bin/index.js",
   "scripts": {
     "test": "node ./test/constructor.js",
     "build": "babel -w src -d lib"
@@ -28,6 +29,7 @@
   },
   "dependencies": {
     "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "lodash": "^4.7.0",
     "mkdirp": "^0.5.1",
     "node-forge": "^0.6.39",

@@ -1,1 +1,1 @@
-module.exports = require('./mitmproxy/Mitmproxy');
+module.exports = require('./mitmproxy/MitmProxy');
