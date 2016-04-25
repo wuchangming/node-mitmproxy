@@ -24,6 +24,8 @@
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/node-mitmproxy/node-mitmproxy.ca.crt
 ```
 ###### windows
+注: 证书需要安装到  ** 受信任的根证书目录 ** 下  
+参考 [issues#3](https://github.com/wuchangming/node-mitmproxy/issues/3)
 ```
 start %HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
 ```
