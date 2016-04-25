@@ -1,6 +1,6 @@
 {
   "name": "node-mitmproxy",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "description": "Node.js MITM Proxy",
   "main": "lib",
   "bin":"lib/bin/index.js",
