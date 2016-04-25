@@ -1,4 +1,5 @@
 # node-mitmproxy
+[![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)
 基于nodejs 实现的MITM(中间人)代理
 
 ## 安装
