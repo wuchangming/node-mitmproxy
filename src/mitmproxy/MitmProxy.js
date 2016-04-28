@@ -89,7 +89,7 @@ module.exports = class MitmProxy {
             this.caKey = forge.pki.privateKeyFromPem(caKeyPem);
             // has exist
         } catch (e) {
-            console.log(colors.red(`先执行命令：${colors.green('node-mitmproxy createCA')} 生成CA证书`));
+            console.log(colors.red(`先执行命令：${colors.green('node-mitmproxy createCA')} 生成CA根证书, 并且安装CA根证书`));
             process.exit(1);
         }
     }
