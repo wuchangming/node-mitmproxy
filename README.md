@@ -1,4 +1,4 @@
-# node-mitmproxy
+# node-mitmproxy v2.X 开发中
 [![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)  
 基于nodejs 实现的MITM(中间人)代理
 
@@ -10,11 +10,11 @@
 
 ###### windows
 ```
-    npm install node-mitmproxy -g
+    npm install node-mitmproxy@next -g
 ```
 ###### Mac
 ```
-    sudo npm install node-mitmproxy -g
+    sudo npm install node-mitmproxy@next -g
 ```
 
 ## 生成CA根证书

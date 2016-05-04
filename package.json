@@ -1,12 +1,13 @@
 {
   "name": "node-mitmproxy",
-  "version": "0.1.0",
+  "version": "2.0.1-alpha",
   "description": "Node.js MITM Proxy",
   "main": "lib",
   "bin": "lib/bin/index.js",
   "scripts": {
     "test": "node ./test/constructor.js",
-    "build": "babel -w src -d lib"
+    "build": "babel -w src -d lib",
+    "prepublish": "babel src -d lib"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,12 @@
     "node-forge": "^0.6.39",
     "through2": "^2.0.1"
   },
+  "publishConfig": {
+    "tag": "next"
+  },
+  "files": [
+    "lib"
+  ],
   "engines": {
     "node": ">= 4"
   }
