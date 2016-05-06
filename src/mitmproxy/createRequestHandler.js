@@ -27,7 +27,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             }
             try {
                 if (typeof requestInterceptor === 'function') {
-                    requestInterceptor(rOptions, req, res, ssl, next);
+                    requestInterceptor.call(null, rOptions, req, res, ssl, next);
                 } else {
                     resolve();
                 }
@@ -67,7 +67,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                 }
                 try {
                     if (typeof responseInterceptor === 'function') {
-                        responseInterceptor(req, res, proxyReq, proxyRes, ssl, next);
+                        responseInterceptor.call(null, req, res, proxyReq, proxyRes, ssl, next);
                     } else {
                         resolve();
                     }
@@ -82,18 +82,21 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                 return false;
             }
 
-            Object.keys(proxyRes.headers).forEach(function(key) {
-            if(proxyRes.headers[key] != undefined){
-                var newkey = key.replace(/^[a-z]|-[a-z]/g, (match) => {
-                    return match.toUpperCase()
+            try {
+                Object.keys(proxyRes.headers).forEach(function(key) {
+                if(proxyRes.headers[key] != undefined){
+                    var newkey = key.replace(/^[a-z]|-[a-z]/g, (match) => {
+                        return match.toUpperCase()
+                    });
+                    var newkey = key;
+                    res.setHeader(newkey, proxyRes.headers[key]);
+                }
                 });
-                var newkey = key;
-                res.setHeader(newkey, proxyRes.headers[key]);
+                res.writeHead(proxyRes.statusCode);
+                proxyRes.pipe(res);
+            } catch (e) {
+                console.log(e);
             }
-            });
-            res.writeHead(proxyRes.statusCode);
-            proxyRes.pipe(res);
-
         })().then(
             (flag) => {
                 if (flag) {

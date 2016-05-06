@@ -3,6 +3,7 @@ const tlsUtils = require('./tlsUtils');
 const CertAndKeyContainer = require('./CertAndKeyContainer');
 const forge = require('node-forge');
 const pki = forge.pki;
+const colors = require('colors');
 
 module.exports = class FakeServersCenter {
     constructor({maxLength = 50, requestHandler, caCert, caKey}) {
@@ -49,7 +50,7 @@ module.exports = class FakeServersCenter {
         fakeServer.on('listening', ()=>{
             callBack(serverObj);
         });
-        // TODO: 
+        // TODO:
         fakeServer.on('upgrade', function(req, socket, head) {
             socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
             'Upgrade: WebSocket\r\n' +
