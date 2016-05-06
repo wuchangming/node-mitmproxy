@@ -6,6 +6,7 @@
 var mitmproxy = require('../lib');
 var through = require('through2');
 var zlib = require('zlib');
+var url = require('url');
 
 var httpUtil = {}
 httpUtil.isGzip = function (res) {
@@ -32,7 +33,21 @@ function chunkReplace (_this, chunk, enc, callback, injectScriptTag) {
 }
 
 mitmproxy.createProxy({
-    sslConnectInterceptor: (req, cltSocket, head) => true,
+    sslConnectInterceptor: (req, cltSocket, head) => {
+
+        var srvUrl = url.parse(`https://${req.url}`);
+
+        // 忽略微信的推广页
+        if (srvUrl.host === 'mp.weixin.qq.com:443') {
+            return false;
+        }
+        // 只拦截浏览器的https请求
+        if (req.headers && req.headers['user-agent'] && /^Mozilla/.test(req.headers['user-agent'])) {
+            return true
+        } else {
+            return false
+        }
+    },
     responseInterceptor: (req, res, proxyReq, proxyRes, ssl, next) => {
         var isHtml = httpUtil.isHtml(proxyRes);
         var contentLengthIsZero = (() => {
@@ -58,6 +73,7 @@ mitmproxy.createProxy({
             res.writeHead(proxyRes.statusCode);
 
             var isGzip = httpUtil.isGzip(proxyRes);
+
             if (isGzip) {
                 proxyRes.pipe(new zlib.Gunzip())
                 .pipe(through(function (chunk, enc, callback) {
