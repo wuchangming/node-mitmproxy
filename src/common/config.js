@@ -1,9 +1,12 @@
 const path = require('path');
 
 var config = exports;
+
 config.caCertFileName = 'node-mitmproxy.ca.crt';
 
 config.caKeyFileName = 'node-mitmproxy.ca.key.pem';
+
+config.defaultPort = 6789;
 
 config.caName = 'node-mitmproxy CA';
 

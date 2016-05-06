@@ -1,22 +1,14 @@
 const https = require('https');
 const tlsUtils = require('./tlsUtils');
-const domain = require('domain');
 const CertAndKeyContainer = require('./CertAndKeyContainer');
 const forge = require('node-forge');
-
-var pki = forge.pki;
-
-var d = domain.create();
-d.on('error', function (err) {
-    console.log(err.message);
-});
+const pki = forge.pki;
 
 module.exports = class FakeServersCenter {
-    constructor({maxLength = 50, requestCB, errorCB, caCert, caKey}) {
+    constructor({maxLength = 50, requestHandler, caCert, caKey}) {
         this.queue = [];
         this.maxLength = maxLength;
-        this.requestCB = requestCB;
-        this.errorCB = errorCB;
+        this.requestHandler = requestHandler;
         this.caCert = caCert;
         this.caKey = caKey;
         this.certAndKeyContainer = new CertAndKeyContainer(1000);
@@ -48,17 +40,23 @@ module.exports = class FakeServersCenter {
             serverObj.port = address.port;
         });
         fakeServer.on('request', (req, res) => {
-            d.run(() => {
-                this.requestCB(req, res);
-            });
+            var ssl = true;
+            this.requestHandler(req, res, ssl);
         });
         fakeServer.on('error', (e) => {
-            d.run(() => {
-                this.errorCB(e);
-            });
+            console.error(e);
         });
         fakeServer.on('listening', ()=>{
             callBack(serverObj);
+        });
+        // TODO: 
+        fakeServer.on('upgrade', function(req, socket, head) {
+            socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
+            'Upgrade: WebSocket\r\n' +
+            'Connection: Upgrade\r\n' +
+            '\r\n');
+            console.log(colors.yellow('暂未支持代理WebSocket！'));
+            socket.pipe(socket);
         });
         this.queue.push(serverObj);
 
