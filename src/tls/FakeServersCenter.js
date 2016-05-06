@@ -95,15 +95,19 @@ module.exports = class FakeServersCenter {
                     path: '/',
                     method: 'HEAD'
                 }, (preRes) => {
-                    var realCert  = preRes.socket.getPeerCertificate();
-                    var certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
-                    this.certAndKeyContainer.addCert(certObj);
-                    preRes.socket.end();
-                    preReq.end();
-                    this.addServer(certObj, (serverObj) => {
-                        callBack(serverObj);
-                        return;
-                    });
+                    try {
+                        var realCert  = preRes.socket.getPeerCertificate();
+                        var certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        this.certAndKeyContainer.addCert(certObj);
+                        preRes.socket.end();
+                        preReq.end();
+                        this.addServer(certObj, (serverObj) => {
+                            callBack(serverObj);
+                            return;
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
                 });
                 preReq.on('error', (e) => {
                     console.log(port, hostname, e);
