@@ -89,6 +89,8 @@ module.exports = class FakeServersCenter {
                     return;
                 });
             } else {
+
+                var certObj;
                 var preReq = https.request({
                     port: port,
                     hostname: hostname,
@@ -97,7 +99,11 @@ module.exports = class FakeServersCenter {
                 }, (preRes) => {
                     try {
                         var realCert  = preRes.socket.getPeerCertificate();
-                        var certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        if (realCert) {
+                            certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        } else {
+                            certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                        }
                         this.certAndKeyContainer.addCert(certObj);
                         preRes.socket.end();
                         preReq.end();
@@ -111,6 +117,14 @@ module.exports = class FakeServersCenter {
                 });
                 preReq.on('error', (e) => {
                     console.log(port, hostname, e);
+                    if (!certObj) {
+                        certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                        this.certAndKeyContainer.addCert(certObj);
+                        this.addServer(certObj, (serverObj) => {
+                            callBack(serverObj);
+                            return;
+                        });
+                    }
                 })
                 preReq.end();
             }

@@ -55,7 +55,6 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
         // workflow control
         (async () => {
             await requestInterceptorPromise;
-
             if (res.finished) {
                 return false;
             }
