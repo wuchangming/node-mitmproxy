@@ -1,6 +1,6 @@
 # node-mitmproxy v2.X 开发中
 [![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)  
-基于nodejs 实现的MITM(中间人)代理, 已lib的方式提供其它nodejs项目调用
+基于nodejs 实现的MITM(中间人) HTTP/HTTPS代理, 支持lib的方式提供其它nodejs项目调用
 
 支持https:  
 <img src="doc/img/node-mitmproxy.gif" width="350px"/>
