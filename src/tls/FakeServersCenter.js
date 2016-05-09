@@ -115,6 +115,12 @@ module.exports = class FakeServersCenter {
                         console.log(e);
                     }
                 });
+                preReq.on('socket', function (socket) {
+                    socket.setTimeout(10*1000);
+                    socket.on('timeout', function() {
+                        preReq.abort();
+                    });
+                });
                 preReq.on('error', (e) => {
                     console.log(port, hostname, e);
                     if (!certObj) {
