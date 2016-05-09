@@ -116,7 +116,7 @@ module.exports = class FakeServersCenter {
                     }
                 });
                 preReq.on('socket', function (socket) {
-                    socket.setTimeout(10*1000);
+                    socket.setTimeout(5*1000);
                     socket.on('timeout', function() {
                         preReq.abort();
                     });
