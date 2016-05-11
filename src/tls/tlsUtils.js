@@ -16,7 +16,7 @@ utils.createCA = function (CN) {
     cert.publicKey = keys.publicKey;
     cert.serialNumber = (new Date()).getTime() + '';
     cert.validity.notBefore = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() - 5);
+    cert.validity.notBefore.setFullYear(cert.validity.notBefore.getFullYear() - 5);
     cert.validity.notAfter = new Date();
     cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 20);
     var attrs = [{
