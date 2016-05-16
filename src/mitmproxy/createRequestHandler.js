@@ -1,6 +1,7 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
+const util = require('../common/util');
 
 
 // create requestHandler function
@@ -9,17 +10,9 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
     // return
     return function requestHandler(req, res, ssl) {
         var proxyReq;
-        var urlObject = url.parse(req.url);
-        var defaultPort = ssl ? 443 : 80;
-        var protocol = ssl?'https:':'http:';
-        var rOptions = {
-            protocol: protocol,
-            hostname: req.headers.host.split(':')[0],
-            method: req.method,
-            port: req.headers.host.split(':')[1] || defaultPort,
-            path: urlObject.path,
-            headers: req.headers
-        }
+
+        var rOptions = util.getOptionsFormRequest(req, ssl);
+        console.log(rOptions);
 
         var requestInterceptorPromise = new Promise((resolve, reject) => {
             var next = () => {

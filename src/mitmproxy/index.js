@@ -5,6 +5,8 @@ const colors = require('colors');
 const createRequestHandler = require('./createRequestHandler');
 const createConnectHandler = require('./createConnectHandler');
 const createFakeServerCenter = require('./createFakeServerCenter');
+const createUpgradeHandler = require('./createUpgradeHandler');
+
 
 module.exports = {
     createProxy({
@@ -15,14 +17,23 @@ module.exports = {
         responseInterceptor
     }) {
         port = ~~port;
-        var requestHandler = createRequestHandler(requestInterceptor, responseInterceptor);
+        var requestHandler = createRequestHandler(
+            requestInterceptor,
+            responseInterceptor
+        );
+
+        var upgradeHandler = createUpgradeHandler();
 
         var fakeServersCenter = createFakeServerCenter({
             caBasePath,
-            requestHandler
+            requestHandler,
+            upgradeHandler
         });
 
-        var connectHandler = createConnectHandler(sslConnectInterceptor, fakeServersCenter);
+        var connectHandler = createConnectHandler(
+            sslConnectInterceptor,
+            fakeServersCenter
+        );
 
         var server = new http.Server();
         server.listen(port, () => {
@@ -40,12 +51,8 @@ module.exports = {
             });
             // TODO: handler WebSocket
             server.on('upgrade', function(req, socket, head) {
-                socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
-                'Upgrade: WebSocket\r\n' +
-                'Connection: Upgrade\r\n' +
-                '\r\n');
-                console.log(colors.yellow('暂未支持代理WebSocket！'));
-                socket.pipe(socket);
+                var ssl = false;
+                upgradeHandler(req, socket, head, ssl);
             });
         });
     },

@@ -6,10 +6,11 @@ const pki = forge.pki;
 const colors = require('colors');
 
 module.exports = class FakeServersCenter {
-    constructor({maxLength = 50, requestHandler, caCert, caKey}) {
+    constructor({maxLength = 50, requestHandler, upgradeHandler, caCert, caKey}) {
         this.queue = [];
         this.maxLength = maxLength;
         this.requestHandler = requestHandler;
+        this.upgradeHandler = upgradeHandler;
         this.caCert = caCert;
         this.caKey = caKey;
         this.certAndKeyContainer = new CertAndKeyContainer(1000);
@@ -51,13 +52,9 @@ module.exports = class FakeServersCenter {
             callBack(serverObj);
         });
         // TODO:
-        fakeServer.on('upgrade', function(req, socket, head) {
-            socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
-            'Upgrade: WebSocket\r\n' +
-            'Connection: Upgrade\r\n' +
-            '\r\n');
-            console.log(colors.yellow('暂未支持代理WebSocket！'));
-            socket.pipe(socket);
+        fakeServer.on('upgrade', (req, socket, head) => {
+            var ssl = true;
+            this.upgradeHandler (req, socket, head, ssl);
         });
         this.queue.push(serverObj);
 
