@@ -6,7 +6,7 @@ const pki = forge.pki;
 const colors = require('colors');
 
 module.exports = class FakeServersCenter {
-    constructor({maxLength = 50, requestHandler, upgradeHandler, caCert, caKey}) {
+    constructor({maxLength = 50, requestHandler, upgradeHandler, caCert, caKey, getCertSocketTimeout}) {
         this.queue = [];
         this.maxLength = maxLength;
         this.requestHandler = requestHandler;
@@ -14,6 +14,7 @@ module.exports = class FakeServersCenter {
         this.caCert = caCert;
         this.caKey = caKey;
         this.certAndKeyContainer = new CertAndKeyContainer(1000);
+        this.getCertSocketTimeout = getCertSocketTimeout;
     }
     addServer ({cert, key}, callBack) {
         if (this.queue.length >= this.maxLength) {
@@ -112,8 +113,11 @@ module.exports = class FakeServersCenter {
                         console.log(e);
                     }
                 });
-                preReq.on('socket', function (socket) {
-                    socket.setTimeout(2*1000);
+                preReq.on('socket', (socket) => {
+
+                    if (typeof this.getCertSocketTimeout === 'number' && this.getCertSocketTimeout > 0) {
+                        socket.setTimeout(this.getCertSocketTimeout);
+                    }
                     socket.on('timeout', function() {
                         preReq.abort();
                     });

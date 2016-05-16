@@ -7,7 +7,8 @@ const FakeServersCenter = require('../tls/FakeServersCenter');
 module.exports = function createFakeServerCenter({
     caBasePath,
     requestHandler,
-    upgradeHandler
+    upgradeHandler,
+    getCertSocketTimeout
 }) {
     var caCertPath = path.resolve(caBasePath, config.caCertFileName);
     var caKeyPath = path.resolve(caBasePath, config.caKeyFileName);
@@ -30,6 +31,7 @@ module.exports = function createFakeServerCenter({
         caKey,
         maxLength: 100,
         requestHandler,
-        upgradeHandler
+        upgradeHandler,
+        getCertSocketTimeout
     });
 }

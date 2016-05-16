@@ -14,7 +14,8 @@ module.exports = {
         caBasePath = config.getDefaultCABasePath(),
         sslConnectInterceptor,
         requestInterceptor,
-        responseInterceptor
+        responseInterceptor,
+        getCertSocketTimeout
     }) {
         port = ~~port;
         var requestHandler = createRequestHandler(
@@ -27,7 +28,8 @@ module.exports = {
         var fakeServersCenter = createFakeServerCenter({
             caBasePath,
             requestHandler,
-            upgradeHandler
+            upgradeHandler,
+            getCertSocketTimeout
         });
 
         var connectHandler = createConnectHandler(

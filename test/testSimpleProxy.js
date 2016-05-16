@@ -10,4 +10,5 @@ mitmproxy.createProxy({
         }
         next();
     },
+    getCertSocketTimeout: 10 * 1000
 });
