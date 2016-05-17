@@ -10,13 +10,31 @@ const createUpgradeHandler = require('./createUpgradeHandler');
 
 module.exports = {
     createProxy({
-        port = 6789,
-        caBasePath = config.getDefaultCABasePath(),
+        port = config.defaultPort,
+        caCertPath,
+        caKeyPath,
         sslConnectInterceptor,
         requestInterceptor,
         responseInterceptor,
-        getCertSocketTimeout
+        getCertSocketTimeout,
+        rejectUnauthorized = false
     }) {
+
+        // Don't reject unauthorized 
+        if (!rejectUnauthorized) {
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
+        }
+
+        if (!caCertPath && !caKeyPath) {
+            var rs = this.createCA();
+            caCertPath = rs.caCertPath;
+            caKeyPath = rs.caKeyPath;
+            if (rs.create) {
+                console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
+                console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
+            }
+        }
+
         port = ~~port;
         var requestHandler = createRequestHandler(
             requestInterceptor,
@@ -26,7 +44,8 @@ module.exports = {
         var upgradeHandler = createUpgradeHandler();
 
         var fakeServersCenter = createFakeServerCenter({
-            caBasePath,
+            caCertPath,
+            caKeyPath,
             requestHandler,
             upgradeHandler,
             getCertSocketTimeout
@@ -59,6 +78,6 @@ module.exports = {
         });
     },
     createCA(caBasePath = config.getDefaultCABasePath()) {
-        tlsUtils.initCA(caBasePath);
+        return tlsUtils.initCA(caBasePath);
     }
 }

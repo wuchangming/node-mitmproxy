@@ -12,7 +12,6 @@ module.exports = function createConnectHandler(sslConnectInterceptor, fakeServer
         var srvUrl = url.parse(`https://${req.url}`);
 
         if (typeof sslConnectInterceptor === 'function' && sslConnectInterceptor.call(null, req, cltSocket, head)) {
-            console.log('connect to ', colors.yellow(srvUrl.host));
             fakeServerCenter.getServer(srvUrl.hostname, srvUrl.port , (serverObj) => {
                 connect(req, cltSocket, head, localIP, serverObj.port);
             });

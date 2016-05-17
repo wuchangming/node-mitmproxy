@@ -3,15 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const forge = require('node-forge');
 const FakeServersCenter = require('../tls/FakeServersCenter');
+const colors = require('colors');
 
 module.exports = function createFakeServerCenter({
-    caBasePath,
+    caCertPath,
+    caKeyPath,
     requestHandler,
     upgradeHandler,
     getCertSocketTimeout
 }) {
-    var caCertPath = path.resolve(caBasePath, config.caCertFileName);
-    var caKeyPath = path.resolve(caBasePath, config.caKeyFileName);
     var caCert;
     var caKey;
     try {
@@ -22,7 +22,7 @@ module.exports = function createFakeServerCenter({
         caCert = forge.pki.certificateFromPem(caCertPem);
         caKey = forge.pki.privateKeyFromPem(caKeyPem);
     } catch (e) {
-        console.log(colors.red(`无法读取CA根证书！确认是否已生成CA根证书, 并且已正确安装CA根证书`), e);
+        console.log(colors.red(`Can not find \`CA certificate\` or \`CA key\`.`), e);
         process.exit(1);
     }
 

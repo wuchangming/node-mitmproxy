@@ -74,6 +74,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             }
 
             try {
+                // prevent duplicate set headers
                 if (!res.headersSent){
                     Object.keys(proxyRes.headers).forEach(function(key) {
                         if(proxyRes.headers[key] != undefined){

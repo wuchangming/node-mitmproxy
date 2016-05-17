@@ -230,43 +230,40 @@ utils.getMappingHostNamesFormCert = function (cert) {
     return mappingHostNames;
 }
 
+// sync
 utils.initCA =  function (basePath = config.getDefaultCABasePath()) {
+
     var caCertPath = path.resolve(basePath, config.caCertFileName);
     var caKeyPath = path.resolve(basePath, config.caKeyFileName);
+
     try {
         fs.accessSync(caCertPath, fs.F_OK);
         fs.accessSync(caKeyPath, fs.F_OK);
-        var caCertPem = fs.readFileSync(caCertPath);
-        var caKeyPem = fs.readFileSync(caKeyPath);
-        this.caCert = forge.pki.certificateFromPem(caCertPem);
-        this.caKey = forge.pki.privateKeyFromPem(caKeyPem);
 
-        console.log(colors.cyan(`证书已经存在： ${basePath}`));
         // has exist
+        return {
+            caCertPath,
+            caKeyPath,
+            create: false
+        }
     } catch (e) {
+
         var caObj = utils.createCA(config.caName);
-        this.caCert = caObj.cert;
-        this.cakey = caObj.key;
-        var certPem = pki.certificateToPem(this.caCert);
 
-        var keyPem = pki.privateKeyToPem(this.cakey);
+        var caCert = caObj.cert;
+        var cakey = caObj.key;
 
-        mkdirp(path.dirname(caCertPath), function (err) {
-            if (err) {
-                console.error(err);
-                return;
-            }
+        var certPem = pki.certificateToPem(caCert);
+        var keyPem = pki.privateKeyToPem(cakey);
 
-            fs.writeFile(caCertPath, certPem, (err) => {
-                if (err) throw err;
-                console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
-            });
+        mkdirp.sync(path.dirname(caCertPath));
+        fs.writeFileSync(caCertPath, certPem);
+        fs.writeFileSync(caKeyPath, keyPem);
 
-            fs.writeFile(caKeyPath, keyPem, (err) => {
-                if (err) throw err;
-                console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
-            });
-        });
-
+    }
+    return {
+        caCertPath,
+        caKeyPath,
+        create: true
     }
 }
