@@ -123,7 +123,6 @@ module.exports = class FakeServersCenter {
                     });
                 });
                 preReq.on('error', (e) => {
-                    console.log(port, hostname, e);
                     if (!certObj) {
                         certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
                         this.certAndKeyContainer.addCert(certObj);

@@ -1,7 +1,7 @@
 const http = require('http');
 const https = require('https');
 const url = require('url');
-const util = require('../common/util');
+const commonUtil = require('../common/util');
 
 
 // create requestHandler function
@@ -11,8 +11,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
     return function requestHandler(req, res, ssl) {
         var proxyReq;
 
-        var rOptions = util.getOptionsFormRequest(req, ssl);
-        console.log(rOptions);
+        var rOptions = commonUtil.getOptionsFormRequest(req, ssl);
 
         var requestInterceptorPromise = new Promise((resolve, reject) => {
             var next = () => {
@@ -75,28 +74,29 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             }
 
             try {
-                Object.keys(proxyRes.headers).forEach(function(key) {
-                if(proxyRes.headers[key] != undefined){
-                    var newkey = key.replace(/^[a-z]|-[a-z]/g, (match) => {
-                        return match.toUpperCase()
+                if (!res.headersSent){
+                    Object.keys(proxyRes.headers).forEach(function(key) {
+                        if(proxyRes.headers[key] != undefined){
+                            var newkey = key.replace(/^[a-z]|-[a-z]/g, (match) => {
+                                return match.toUpperCase()
+                            });
+                            var newkey = key;
+                            res.setHeader(newkey, proxyRes.headers[key]);
+                        }
                     });
-                    var newkey = key;
-                    res.setHeader(newkey, proxyRes.headers[key]);
+                    res.writeHead(proxyRes.statusCode);
+                    proxyRes.pipe(res);
                 }
-                });
-                res.writeHead(proxyRes.statusCode);
-                proxyRes.pipe(res);
+
             } catch (e) {
-                console.log(e);
+                console.error(e);
             }
         })().then(
             (flag) => {
-                if (flag) {
-                    console.log(flag);
-                }
+                // do nothing
             },
             (e) => {
-                console.log(e);
+                console.error(e);
             }
         );
 
