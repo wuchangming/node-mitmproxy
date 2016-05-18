@@ -98,26 +98,41 @@ mitmproxy.createProxy({
 拦截客户端请求/响应
 
 参数说明：
-1、requestOptions：客户端请求参数
-2、clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-3、clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-4、ssl: 该请求是否为https
-5、next: 回调函数，执行完拦截逻辑后调用该方法
+1、requestOptions：客户端请求参数  
+2、clientReq: 客户端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
+3、clientRes: 客户端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
+4、ssl: 该请求是否为https  
+5、next: 回调函数，执行完拦截逻辑后调用该方法  
 ```
     requestInterceptor: (requestOptions, clientReq, clientRes, ssl, next) => {
         next();
     }
 ```
+#### responseInterceptor
+拦截服务端请求/响应
+参数说明：
+
+1、clientReq: 客户端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
+2、clientRes: 客户端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
+3、proxyRes: 服务端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
+4、proxyRes: 服务端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
+5、ssl: 该请求是否为https  
+6、next: 回调函数，执行完拦截逻辑后调用该方法  
+```
+    responseInterceptor: (clientReq, clientRes, proxyRes, proxyRes, ssl, next) => {
+        next();
+    }
+```
 #### caCertPath
-CA根证书路径(ps: 无特殊情况无需配置)
-默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
+CA根证书路径(ps: 无特殊情况无需配置)  
+默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt  
 ```
 caCertPath: 'xxxx/xxxx.crt'
 ```
 
 #### caKeyPath
-CA根证书密钥路径(ps: 无特殊情况无需配置)
-默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.key.pem
+CA根证书密钥路径(ps: 无特殊情况无需配置)  
+默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.key.pem  
 ```
 caKeyPath: 'xxxx/xxxx.pem'
 ```
