@@ -95,9 +95,9 @@ mitmproxy.createProxy({
 ```
 
 #### requestInterceptor
-拦截客户端请求/响应
+拦截客户端请求/响应  
 
-参数说明：
+参数说明：  
 1、requestOptions：客户端请求参数  
 2、clientReq: 客户端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
 3、clientRes: 客户端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
@@ -109,8 +109,8 @@ mitmproxy.createProxy({
     }
 ```
 #### responseInterceptor
-拦截服务端请求/响应
-参数说明：
+拦截服务端请求/响应  
+参数说明：  
 
 1、clientReq: 客户端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
 2、clientRes: 客户端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
