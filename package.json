@@ -1,6 +1,6 @@
 {
   "name": "node-mitmproxy",
-  "version": "2.1.0-alpha",
+  "version": "2.1.1",
   "description": "Node.js MITM Proxy",
   "main": "lib",
   "bin": "lib/bin/index.js",
@@ -39,9 +39,6 @@
     "mkdirp": "^0.5.1",
     "node-forge": "^0.6.39",
     "through2": "^2.0.1"
-  },
-  "publishConfig": {
-    "tag": "next"
   },
   "files": [
     "lib"

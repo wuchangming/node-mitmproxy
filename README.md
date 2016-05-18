@@ -36,14 +36,14 @@ module.exports = {
 };
 
 ```
-[详细配置说明](#4、配置详细说明)  
+[详细配置说明](https://github.com/wuchangming/node-mitmproxy#4配置详细说明)  
 [更多例子](./example/config/)
 #### 启动方式
 node-mitmproxy -c simpleConfig.js
 
 
 ### 安装node-mitmproxy CA根证书
-生成CA根证书的默认路径：%用户名%/node-mitmproxy
+生成CA根证书的默认路径：`%用户名%/node-mitmproxy`
 
 #### PC下安装根证书方式
 ###### Mac
@@ -77,39 +77,47 @@ mitmproxy.createProxy({
 
 
 ## 4、配置详细说明
+
+#### port
+启动端口（默认：6789）
 ```
-module.exports = {
-    // 判断该connnect请求是否需要代理，传入参数参考[http connnect](https://nodejs.org/api/http.html#http_event_connect) 。
+    port: 6789
+```
+
+#### sslConnectInterceptor
+判断该connnect请求是否需要代理，传入参数参考[http connnect](https://nodejs.org/api/http.html#http_event_connect) 。
+```
     sslConnectInterceptor: (clientReq, clientSocket, head) => true,
-    // 拦截客户端请求/响应
-    // requestOptions：客户端请求参数
-    // clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-    // clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-    // ssl: 该请求是否为https
-    // next: 回调函数，执行完拦截逻辑后调用该方法
+```
+
+#### requestInterceptor
+拦截客户端请求/响应
+
+参数说明：
+1、requestOptions：客户端请求参数
+2、clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+3、clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
+4、ssl: 该请求是否为https
+5、next: 回调函数，执行完拦截逻辑后调用该方法
+```
     requestInterceptor: (requestOptions, clientReq, clientRes, ssl, next) => {
         next();
-    },
-    // 拦截服务端请求/响应
-    // clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-    // clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-    // proxyRes: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
-    // proxyRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
-    // ssl: 该请求是否为https
-    // next: 回调函数，执行完拦截逻辑后调用该方法
-    responseInterceptor: (clientReq, clientRes, proxyRes, proxyRes, ssl, next) => {
-        next();
-    },
-    // 启动端口，默认6789
-    port: 6789,
-    // CA根证书路径(ps: 无特殊情况无需配置)
-    // 默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
-    caCertPath: 'xxxx/xxxx.crt',
-    // CA根证书密钥路径(ps: 无特殊情况无需配置)
-    // 默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.key.pem
-    caKeyPath: 'xxxx/xxxx.pem'
-}
+    }
 ```
+#### caCertPath
+CA根证书路径(ps: 无特殊情况无需配置)
+默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
+```
+caCertPath: 'xxxx/xxxx.crt'
+```
+
+#### caKeyPath
+CA根证书密钥路径(ps: 无特殊情况无需配置)
+默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.key.pem
+```
+caKeyPath: 'xxxx/xxxx.pem'
+```
+
 ## 5、更多
 #### 关于伪造https证书的逻辑图
 <img src="doc/img/node-MitmProxy https.png" width=650/>
