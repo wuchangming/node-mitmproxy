@@ -16,7 +16,7 @@ utils.createCA = function (CN) {
     cert.publicKey = keys.publicKey;
     cert.serialNumber = (new Date()).getTime() + '';
     cert.validity.notBefore = new Date();
-    cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() - 5);
+    cert.validity.notBefore.setFullYear(cert.validity.notBefore.getFullYear() - 5);
     cert.validity.notAfter = new Date();
     cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 20);
     var attrs = [{
@@ -64,6 +64,87 @@ utils.createCA = function (CN) {
 utils.covertNodeCertToForgeCert = function (originCertificate) {
     var obj = forge.asn1.fromDer(originCertificate.raw.toString('binary'));
     return forge.pki.certificateFromAsn1(obj);
+}
+
+utils.createFakeCertificateByDomain = function (caKey, caCert, domain) {
+    var keys = pki.rsa.generateKeyPair(2048);
+    var cert = pki.createCertificate();
+    cert.publicKey = keys.publicKey;
+
+    cert.serialNumber = (new Date()).getTime()+'';
+    cert.validity.notBefore = new Date();
+    cert.validity.notBefore.setFullYear(cert.validity.notBefore.getFullYear() - 1);
+    cert.validity.notAfter = new Date();
+    cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 1);
+    console.log(domain);
+    var attrs = [{
+      name: 'commonName',
+      value: domain
+    }, {
+      name: 'countryName',
+      value: 'CN'
+    }, {
+      shortName: 'ST',
+      value: 'GuangDong'
+    }, {
+      name: 'localityName',
+      value: 'ShengZhen'
+    }, {
+      name: 'organizationName',
+      value: 'node-mitmproxy'
+    }, {
+      shortName: 'OU',
+      value: 'https://github.com/wuchangming/node-mitmproxy'
+    }];
+
+    cert.setIssuer(caCert.subject.attributes);
+    cert.setSubject(attrs);
+
+    cert.setExtensions([{
+        name: 'basicConstraints',
+        critical: true,
+        cA: false
+    },
+    {
+        name: 'keyUsage',
+        critical: true,
+        digitalSignature: true,
+        contentCommitment: true,
+        keyEncipherment: true,
+        dataEncipherment: true,
+        keyAgreement: true,
+        keyCertSign: true,
+        cRLSign: true,
+        encipherOnly: true,
+        decipherOnly: true
+    },
+    {
+        name: 'subjectAltName',
+        altNames: [{
+          type: 2,
+          value: domain
+        }]
+    },
+    {
+        name: 'subjectKeyIdentifier'
+    },
+    {
+        name: 'extKeyUsage',
+        serverAuth: true,
+        clientAuth: true,
+        codeSigning: true,
+        emailProtection: true,
+        timeStamping: true
+    },
+    {
+        name:'authorityKeyIdentifier'
+    }]);
+    cert.sign(caKey, forge.md.sha256.create());
+
+    return {
+        key: keys.privateKey,
+        cert: cert
+    };
 }
 
 utils.createFakeCertificateByCA = function (caKey, caCert, originCertificate) {
@@ -149,43 +230,40 @@ utils.getMappingHostNamesFormCert = function (cert) {
     return mappingHostNames;
 }
 
+// sync
 utils.initCA =  function (basePath = config.getDefaultCABasePath()) {
+
     var caCertPath = path.resolve(basePath, config.caCertFileName);
     var caKeyPath = path.resolve(basePath, config.caKeyFileName);
+
     try {
         fs.accessSync(caCertPath, fs.F_OK);
         fs.accessSync(caKeyPath, fs.F_OK);
-        var caCertPem = fs.readFileSync(caCertPath);
-        var caKeyPem = fs.readFileSync(caKeyPath);
-        this.caCert = forge.pki.certificateFromPem(caCertPem);
-        this.caKey = forge.pki.privateKeyFromPem(caKeyPem);
 
-        console.log(colors.cyan(`证书已经存在： ${basePath}`));
         // has exist
+        return {
+            caCertPath,
+            caKeyPath,
+            create: false
+        }
     } catch (e) {
+
         var caObj = utils.createCA(config.caName);
-        this.caCert = caObj.cert;
-        this.cakey = caObj.key;
-        var certPem = pki.certificateToPem(this.caCert);
 
-        var keyPem = pki.privateKeyToPem(this.cakey);
+        var caCert = caObj.cert;
+        var cakey = caObj.key;
 
-        mkdirp(path.dirname(caCertPath), function (err) {
-            if (err) {
-                console.error(err);
-                return;
-            }
+        var certPem = pki.certificateToPem(caCert);
+        var keyPem = pki.privateKeyToPem(cakey);
 
-            fs.writeFile(caCertPath, certPem, (err) => {
-                if (err) throw err;
-                console.log(colors.cyan(`CA Cert saved in: ${caCertPath}`));
-            });
+        mkdirp.sync(path.dirname(caCertPath));
+        fs.writeFileSync(caCertPath, certPem);
+        fs.writeFileSync(caKeyPath, keyPem);
 
-            fs.writeFile(caKeyPath, keyPem, (err) => {
-                if (err) throw err;
-                console.log(colors.cyan(`CA private key saved in: ${caKeyPath}`));
-            });
-        });
-
+    }
+    return {
+        caCertPath,
+        caKeyPath,
+        create: true
     }
 }

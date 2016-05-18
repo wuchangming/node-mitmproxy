@@ -1,25 +1,20 @@
 const https = require('https');
 const tlsUtils = require('./tlsUtils');
-const domain = require('domain');
 const CertAndKeyContainer = require('./CertAndKeyContainer');
 const forge = require('node-forge');
-
-var pki = forge.pki;
-
-var d = domain.create();
-d.on('error', function (err) {
-    console.log(err.message);
-});
+const pki = forge.pki;
+const colors = require('colors');
 
 module.exports = class FakeServersCenter {
-    constructor({maxLength = 50, requestCB, errorCB, caCert, caKey}) {
+    constructor({maxLength = 50, requestHandler, upgradeHandler, caCert, caKey, getCertSocketTimeout}) {
         this.queue = [];
         this.maxLength = maxLength;
-        this.requestCB = requestCB;
-        this.errorCB = errorCB;
+        this.requestHandler = requestHandler;
+        this.upgradeHandler = upgradeHandler;
         this.caCert = caCert;
         this.caKey = caKey;
         this.certAndKeyContainer = new CertAndKeyContainer(1000);
+        this.getCertSocketTimeout = getCertSocketTimeout;
     }
     addServer ({cert, key}, callBack) {
         if (this.queue.length >= this.maxLength) {
@@ -48,17 +43,19 @@ module.exports = class FakeServersCenter {
             serverObj.port = address.port;
         });
         fakeServer.on('request', (req, res) => {
-            d.run(() => {
-                this.requestCB(req, res);
-            });
+            var ssl = true;
+            this.requestHandler(req, res, ssl);
         });
         fakeServer.on('error', (e) => {
-            d.run(() => {
-                this.errorCB(e);
-            });
+            console.error(e);
         });
         fakeServer.on('listening', ()=>{
             callBack(serverObj);
+        });
+        // TODO:
+        fakeServer.on('upgrade', (req, socket, head) => {
+            var ssl = true;
+            this.upgradeHandler (req, socket, head, ssl);
         });
         this.queue.push(serverObj);
 
@@ -90,24 +87,50 @@ module.exports = class FakeServersCenter {
                     return;
                 });
             } else {
+
+                var certObj;
                 var preReq = https.request({
                     port: port,
                     hostname: hostname,
                     path: '/',
                     method: 'HEAD'
                 }, (preRes) => {
-                    var realCert  = preRes.socket.getPeerCertificate();
-                    var certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
-                    this.certAndKeyContainer.addCert(certObj);
-                    preRes.socket.end();
-                    preReq.end();
-                    this.addServer(certObj, (serverObj) => {
-                        callBack(serverObj);
-                        return;
+                    try {
+                        var realCert  = preRes.socket.getPeerCertificate();
+                        if (realCert) {
+                            certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        } else {
+                            certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                        }
+                        this.certAndKeyContainer.addCert(certObj);
+                        preRes.socket.end();
+                        preReq.end();
+                        this.addServer(certObj, (serverObj) => {
+                            callBack(serverObj);
+                            return;
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+                preReq.on('socket', (socket) => {
+
+                    if (typeof this.getCertSocketTimeout === 'number' && this.getCertSocketTimeout > 0) {
+                        socket.setTimeout(this.getCertSocketTimeout);
+                    }
+                    socket.on('timeout', function() {
+                        preReq.abort();
                     });
                 });
                 preReq.on('error', (e) => {
-                    console.log(port, hostname, e);
+                    if (!certObj) {
+                        certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                        this.certAndKeyContainer.addCert(certObj);
+                        this.addServer(certObj, (serverObj) => {
+                            callBack(serverObj);
+                            return;
+                        });
+                    }
                 })
                 preReq.end();
             }
