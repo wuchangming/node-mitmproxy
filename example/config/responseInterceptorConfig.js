@@ -1,3 +1,7 @@
+
+// demo说明：
+// 拦截所有服务器响应在html中注入 样式 '<style>body {background:red !important}</style>'
+
 var through = require('through2');
 var zlib = require('zlib');
 var url = require('url');

@@ -1,4 +1,7 @@
 
+// demo说明：
+// 拦截所有请求统一返回 'hello node-mitmproxy!'
+
 module.exports = {
     sslConnectInterceptor: (req, cltSocket, head) => true,
     requestInterceptor: (rOptions, req, res, ssl, next) => {

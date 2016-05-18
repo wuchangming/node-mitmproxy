@@ -1,32 +1,51 @@
-# node-mitmproxy v2.X 开发中
+# node-mitmproxy
 [![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)  
-基于nodejs 实现的MITM(中间人) HTTP/HTTPS代理, 支持lib的方式提供其它nodejs项目调用
+node-mitmproxy是一个基于nodejs，支持http/https的中间人(MITM)代理，便于渗透测试和开发调试。
 
-支持https:  
-<img src="doc/img/node-mitmproxy.gif" width="350px"/>
+## 1、特性
+1、支持https  
+2、支持配置的方式启动，也支持以模块的方式引入到代码中
 
-<img src="doc/img/example1.jpg" width="350px"/>
-
-
-## 安装
+## 2、安装
 
 ###### windows
 ```
-    npm install node-mitmproxy@next
+    npm install node-mitmproxy -g
 ```
 ###### Mac
 ```
-    npm install node-mitmproxy@next
+    sudo npm install node-mitmproxy -g
 ```
 
-## 生成CA根证书
+## 3、使用
+
+#### 关于配置文件
+
+###### 简单配置：
+
+simpleConfig.js
 ```
-    var mitmproxy = require('node-mitmproxy');
-    mitmproxy.createCA();
+module.exports = {
+    sslConnectInterceptor: (req, cltSocket, head) => true,
+    requestInterceptor: (rOptions, req, res, ssl, next) => {
+        console.log(`正在访问：${rOptions.protocol}//${rOptions.hostname}:${rOptions.port}`);
+        console.log('cookie:', rOptions.headers.cookie);
+        res.end('hello node-mitmproxy!');
+        next();
+    }
+};
 
 ```
+[详细配置说明](#4、配置详细说明)  
+[更多例子](./example/config/)
+#### 启动方式
+node-mitmproxy -c simpleConfig.js
 
-## 安装CA Root证书
+
+### 安装node-mitmproxy CA根证书
+生成CA根证书的默认路径：%用户名%/node-mitmproxy
+
+#### PC下安装根证书方式
 ###### Mac
 ```
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/node-mitmproxy/node-mitmproxy.ca.crt
@@ -38,7 +57,7 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 start %HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
 ```
 
-## 启动代理
+## 以nodejs模块的方式引用到代码中
 ```
 var mitmproxy = require('node-mitmproxy');
 
@@ -57,5 +76,40 @@ mitmproxy.createProxy({
 ```
 
 
-## 关于伪造https证书的逻辑图
-<img src="doc/img/node-MitmProxy https.png"/>
+## 4、配置详细说明
+```
+module.exports = {
+    // 判断该connnect请求是否需要代理，传入参数参考[http connnect](https://nodejs.org/api/http.html#http_event_connect) 。
+    sslConnectInterceptor: (clientReq, clientSocket, head) => true,
+    // 拦截客户端请求/响应
+    // requestOptions：客户端请求参数
+    // clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+    // clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
+    // ssl: 该请求是否为https
+    // next: 回调函数，执行完拦截逻辑后调用该方法
+    requestInterceptor: (requestOptions, clientReq, clientRes, ssl, next) => {
+        next();
+    },
+    // 拦截服务端请求/响应
+    // clientReq: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+    // clientRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
+    // proxyRes: 参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)
+    // proxyRes: 参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)
+    // ssl: 该请求是否为https
+    // next: 回调函数，执行完拦截逻辑后调用该方法
+    responseInterceptor: (clientReq, clientRes, proxyRes, proxyRes, ssl, next) => {
+        next();
+    },
+    // 启动端口，默认6789
+    port: 6789,
+    // CA根证书路径(ps: 无特殊情况无需配置)
+    // 默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.crt
+    caCertPath: 'xxxx/xxxx.crt',
+    // CA根证书密钥路径(ps: 无特殊情况无需配置)
+    // 默认：%HOMEPATH%/node-mitmproxy/node-mitmproxy.ca.key.pem
+    caKeyPath: 'xxxx/xxxx.pem'
+}
+```
+## 5、更多
+#### 关于伪造https证书的逻辑图
+<img src="doc/img/node-MitmProxy https.png" width=650/>
