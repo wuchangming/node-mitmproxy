@@ -36,11 +36,15 @@ module.exports = {
 };
 
 ```
+效果图：  
+<img width=500 src="./doc/img/hello_node-mitmproxy.jpg" />
+
 [详细配置说明](https://github.com/wuchangming/node-mitmproxy#4配置详细说明)  
 [更多例子](./example/config/)
 #### 启动方式
+```
 node-mitmproxy -c simpleConfig.js
-
+```
 
 ### 安装node-mitmproxy CA根证书
 生成CA根证书的默认路径：`%用户名%/node-mitmproxy`
