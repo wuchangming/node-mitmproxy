@@ -4,6 +4,8 @@ const CertAndKeyContainer = require('./CertAndKeyContainer');
 const forge = require('node-forge');
 const pki = forge.pki;
 const colors = require('colors');
+const tls = require('tls');
+
 
 module.exports = class FakeServersCenter {
     constructor({maxLength = 50, requestHandler, upgradeHandler, caCert, caKey, getCertSocketTimeout}) {
@@ -29,7 +31,14 @@ module.exports = class FakeServersCenter {
 
         var fakeServer = new https.Server({
             key: keyPem,
-            cert: certPem
+            cert: certPem,
+            SNICallback: (hostname, done) => {
+                var certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                done(null, tls.createSecureContext({
+                    key: pki.privateKeyToPem(certObj.key),
+                    cert: pki.certificateToPem(certObj.cert)
+                }))
+            }
         });
         var serverObj = {
             mappingHostNames,

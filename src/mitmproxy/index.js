@@ -17,10 +17,11 @@ module.exports = {
         requestInterceptor,
         responseInterceptor,
         getCertSocketTimeout,
-        rejectUnauthorized = false
+        rejectUnauthorized = false,
+        plugins = []
     }) {
 
-        // Don't reject unauthorized 
+        // Don't reject unauthorized
         if (!rejectUnauthorized) {
             process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
         }
@@ -38,7 +39,8 @@ module.exports = {
         port = ~~port;
         var requestHandler = createRequestHandler(
             requestInterceptor,
-            responseInterceptor
+            responseInterceptor,
+            plugins
         );
 
         var upgradeHandler = createUpgradeHandler();

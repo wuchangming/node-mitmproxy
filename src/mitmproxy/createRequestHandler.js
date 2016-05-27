@@ -5,7 +5,7 @@ const commonUtil = require('../common/util');
 
 
 // create requestHandler function
-module.exports = function createRequestHandler(requestInterceptor, responseInterceptor) {
+module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, plugins) {
 
     // return
     return function requestHandler(req, res, ssl) {
@@ -46,10 +46,13 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         // workflow control
         (async () => {
+
             await requestInterceptorPromise;
+
             if (res.finished) {
                 return false;
             }
+            
             var proxyRes = await proxyRequestPromise;
 
             var responseInterceptorPromise = new Promise((resolve, reject) => {
