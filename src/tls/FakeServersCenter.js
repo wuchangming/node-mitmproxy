@@ -31,14 +31,7 @@ module.exports = class FakeServersCenter {
 
         var fakeServer = new https.Server({
             key: keyPem,
-            cert: certPem,
-            SNICallback: (hostname, done) => {
-                var certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
-                done(null, tls.createSecureContext({
-                    key: pki.privateKeyToPem(certObj.key),
-                    cert: pki.certificateToPem(certObj.cert)
-                }))
-            }
+            cert: certPem
         });
         var serverObj = {
             mappingHostNames,
