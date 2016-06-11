@@ -43,9 +43,6 @@
   "files": [
     "lib"
   ],
-  "publishConfig": {
-     "tag": "next"
-  },
   "engines": {
     "node": ">= 4"
   }
