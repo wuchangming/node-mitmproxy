@@ -30,7 +30,7 @@ module.exports = class CertAndKeyContainer {
                 let DNSName = mappingHostNames[j];
                 if (tlsUtils.isMappingHostName(DNSName, hostname)) {
                     this.reRankCert(i);
-                    return rCert;
+                    return certObj;
                 }
             }
         }
