@@ -1,40 +1,88 @@
 const tlsUtils = require('./tlsUtils');
+const https = require('https');
 
 module.exports = class CertAndKeyContainer {
-    constructor(maxLength = 1000) {
+    constructor({
+        maxLength = 1000,
+        getCertSocketTimeout = 2 * 1000,
+        caCert,
+        caKey
+    }) {
         this.queue = [];
         this.maxLength = maxLength;
+        this.getCertSocketTimeout = getCertSocketTimeout;
+        this.caCert = caCert;
+        this.caKey = caKey;
     }
-    addCert ({cert, key}) {
+    addCertPromise (certPromiseObj) {
         if (this.queue.length >= this.maxLength) {
             this.queue.shift();
         }
-
-        var mappingHostNames = tlsUtils.getMappingHostNamesFormCert(cert);
-
-        var certObj = {
-            mappingHostNames,
-            cert,
-            key
-        }
-
-        this.queue.push(certObj);
-
-        return certObj;
+        this.queue.push(certPromiseObj);
+        return certPromiseObj;
     }
-    getCert (hostname) {
+    getCertPromise (hostname, port) {
         for (let i = 0; i < this.queue.length; i++) {
-            let certObj = this.queue[i];
-            let mappingHostNames = certObj.mappingHostNames;
+            let _certPromiseObj = this.queue[i];
+            let mappingHostNames = _certPromiseObj.mappingHostNames;
             for (let j = 0; j < mappingHostNames.length; j++) {
                 let DNSName = mappingHostNames[j];
                 if (tlsUtils.isMappingHostName(DNSName, hostname)) {
                     this.reRankCert(i);
-                    return certObj;
+                    return _certPromiseObj.promise;
                 }
             }
         }
-        return null;
+
+        var certPromiseObj = {
+            mappingHostNames: [hostname] // temporary hostname
+        }
+
+        let promise = new Promise((resolve, reject) => {
+
+            var _resolve = (_certObj) => {
+                var mappingHostNames = tlsUtils.getMappingHostNamesFormCert(_certObj.cert);
+                certPromiseObj.mappingHostNames = mappingHostNames; // change
+                resolve(_certObj);
+            }
+            let certObj;
+            var preReq = https.request({
+                port: port,
+                hostname: hostname,
+                path: '/',
+                method: 'HEAD'
+            }, (preRes) => {
+                try {
+                    var realCert  = preRes.socket.getPeerCertificate();
+                    if (realCert) {
+                        certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                    } else {
+                        certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                    }
+                    _resolve(certObj);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            preReq.on('socket', (socket) => {
+                socket.setTimeout(this.getCertSocketTimeout);
+                socket.on('timeout', function() {
+                    preReq.abort();
+                });
+            });
+            preReq.on('error', (e) => {
+                if (!certObj) {
+                    certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                    _resolve(certObj);
+                }
+            })
+            preReq.end();
+        });
+
+        certPromiseObj.promise = promise;
+
+        return (this.addCertPromise(certPromiseObj)).promise;
+
     }
     reRankCert (index) {
         // index ==> queue foot
