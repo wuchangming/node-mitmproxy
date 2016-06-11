@@ -1,6 +1,6 @@
 {
   "name": "node-mitmproxy",
-  "version": "2.1.4",
+  "version": "3.0.0-dev",
   "description": "Node.js MITM Proxy",
   "main": "lib",
   "bin": "lib/bin/index.js",
@@ -43,6 +43,9 @@
   "files": [
     "lib"
   ],
+  "publishConfig": {
+     "tag": "next"
+  },
   "engines": {
     "node": ">= 4"
   }
