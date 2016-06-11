@@ -11,7 +11,7 @@ var pki = forge.pki;
 
 utils.createCA = function (CN) {
 
-    var keys = pki.rsa.generateKeyPair(2048);
+    var keys = pki.rsa.generateKeyPair(1024);
     var cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
     cert.serialNumber = (new Date()).getTime() + '';
@@ -67,7 +67,7 @@ utils.covertNodeCertToForgeCert = function (originCertificate) {
 }
 
 utils.createFakeCertificateByDomain = function (caKey, caCert, domain) {
-    var keys = pki.rsa.generateKeyPair(2048);
+    var keys = pki.rsa.generateKeyPair(1024);
     var cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
 
@@ -150,7 +150,7 @@ utils.createFakeCertificateByDomain = function (caKey, caCert, domain) {
 utils.createFakeCertificateByCA = function (caKey, caCert, originCertificate) {
     var certificate = utils.covertNodeCertToForgeCert(originCertificate);
 
-    var keys = pki.rsa.generateKeyPair(2048);
+    var keys = pki.rsa.generateKeyPair(1024);
     var cert = pki.createCertificate();
     cert.publicKey = keys.publicKey;
 
