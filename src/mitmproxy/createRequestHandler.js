@@ -2,7 +2,7 @@ const http = require('http');
 const https = require('https');
 const url = require('url');
 const commonUtil = require('../common/util');
-
+const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
 
 // create requestHandler function
 module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, plugins) {
@@ -30,6 +30,17 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         var proxyRequestPromise = new Promise((resolve, reject) => {
 
+            // copy from node-http-proxy :)
+            // Remark: If we are false and not upgrading, set the connection: close. This is the right thing to do
+            // as node core doesn't handle this COMPLETELY properly yet.
+            //
+            if (!rOptions.agent) {
+                rOptions.headers = rOptions.headers || {};
+                if (typeof rOptions.headers.connection !== 'string' || !upgradeHeader.test(rOptions.headers.connection)) {
+                    rOptions.headers.connection = 'close';
+                }
+            }
+
             proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
                 resolve(proxyRes);
             });
@@ -52,7 +63,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             if (res.finished) {
                 return false;
             }
-            
+
             var proxyRes = await proxyRequestPromise;
 
             var responseInterceptorPromise = new Promise((resolve, reject) => {
