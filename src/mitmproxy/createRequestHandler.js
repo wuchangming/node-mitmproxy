@@ -3,6 +3,12 @@ const https = require('https');
 const url = require('url');
 const commonUtil = require('../common/util');
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
+const Agent = require('agentkeepalive');
+const HttpsAgent = require('agentkeepalive').HttpsAgent;
+
+
+var agent =  new Agent();
+var httpsAgent = new HttpsAgent();
 
 // create requestHandler function
 module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, plugins) {
@@ -30,6 +36,17 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         var proxyRequestPromise = new Promise((resolve, reject) => {
 
+            // NTLM Authenticate depend on keepAlive
+
+
+            // keepAlive
+            if (rOptions.headers.connection === 'keep-alive') {
+                if (rOptions.protocol == 'https:') {
+                    rOptions.agent = httpsAgent;
+                } else {
+                    rOptions.agent = agent;
+                }
+            }
             // copy from node-http-proxy :)
             // Remark: If we are false and not upgrading, set the connection: close. This is the right thing to do
             // as node core doesn't handle this COMPLETELY properly yet.
@@ -111,7 +128,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                 // do nothing
             },
             (e) => {
-                console.error(e);
+                console.error(e.stack);
             }
         );
 

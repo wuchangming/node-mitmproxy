@@ -28,6 +28,7 @@
     "babel-cli": "^6.6.5"
   },
   "dependencies": {
+    "agentkeepalive": "^2.1.1",
     "babel-core": "^6.8.0",
     "babel-plugin-transform-async-to-generator": "^6.7.4",
     "babel-polyfill": "^6.8.0",
