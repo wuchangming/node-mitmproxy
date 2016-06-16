@@ -36,9 +36,6 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         var proxyRequestPromise = new Promise((resolve, reject) => {
 
-            // NTLM Authenticate depend on keepAlive
-
-
             // keepAlive
             if (rOptions.headers.connection === 'keep-alive') {
                 if (rOptions.protocol == 'https:') {

@@ -5,6 +5,9 @@
 var through = require('through2');
 var zlib = require('zlib');
 var url = require('url');
+var charset = require('charset');
+var iconv = require('iconv-lite');
+var jschardet = require('jschardet');
 
 var httpUtil = {}
 httpUtil.isGzip = function (res) {
@@ -23,10 +26,25 @@ function injectScriptIntoHtml(html, script) {
     return html;
 }
 
-function chunkReplace (_this, chunk, enc, callback, injectScriptTag) {
-    var chunkString = chunk.toString();
+function chunkReplace (_this, chunk, enc, callback, injectScriptTag, proxyRes) {
+    var _charset = charset(proxyRes, chunk) || jschardet.detect(chunk).encoding.toLowerCase();
+    var chunkString;
+    if (_charset != null && _charset != 'utf-8') {
+        chunkString = iconv.decode(chunk, _charset);
+    } else {
+        chunkString = chunk.toString();
+    }
+
     var newChunkString = injectScriptIntoHtml(chunkString, injectScriptTag);
-    _this.push(new Buffer(newChunkString));
+
+    var buffer;
+    if (_charset != null && _charset != 'utf-8') {
+        buffer = iconv.encode(newChunkString, _charset);
+    } else {
+        buffer = new Buffer(newChunkString);
+    }
+
+    _this.push(buffer);
     callback();
 }
 
@@ -75,11 +93,11 @@ module.exports = {
             if (isGzip) {
                 proxyRes.pipe(new zlib.Gunzip())
                 .pipe(through(function (chunk, enc, callback) {
-                    chunkReplace(this, chunk, enc, callback, '<style>body {background:red !important}</style>');
+                    chunkReplace(this, chunk, enc, callback, '<style>body {background:red !important}</style>', proxyRes);
                 })).pipe(new zlib.Gzip()).pipe(res);
             } else {
                 proxyRes.pipe(through(function (chunk, enc, callback) {
-                    chunkReplace(this, chunk, enc, callback, '<style>body {background:red !important}</style>');
+                    chunkReplace(this, chunk, enc, callback, '<style>body {background:red !important}</style>', proxyRes);
                 })).pipe(res);
             }
         }
