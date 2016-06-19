@@ -3,21 +3,21 @@ const https = require('https');
 const url = require('url');
 const commonUtil = require('../common/util');
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
-const Agent = require('agentkeepalive');
-const HttpsAgent = require('agentkeepalive').HttpsAgent;
-
-
-var agent =  new Agent();
-var httpsAgent = new HttpsAgent();
 
 // create requestHandler function
 module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, plugins) {
 
     // return
     return function requestHandler(req, res, ssl) {
+
         var proxyReq;
 
         var rOptions = commonUtil.getOptionsFormRequest(req, ssl);
+
+        if (typeof rOptions.headers.connection === 'string' && rOptions.headers.connection === 'close') {
+            req.socket.setKeepAlive(false);
+            console.log('req.socket.setKeepAlive(false);');
+        }
 
         var requestInterceptorPromise = new Promise((resolve, reject) => {
             var next = () => {
@@ -35,25 +35,6 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
         });
 
         var proxyRequestPromise = new Promise((resolve, reject) => {
-
-            // keepAlive
-            if (rOptions.headers.connection === 'keep-alive') {
-                if (rOptions.protocol == 'https:') {
-                    rOptions.agent = httpsAgent;
-                } else {
-                    rOptions.agent = agent;
-                }
-            }
-            // copy from node-http-proxy :)
-            // Remark: If we are false and not upgrading, set the connection: close. This is the right thing to do
-            // as node core doesn't handle this COMPLETELY properly yet.
-            //
-            if (!rOptions.agent) {
-                rOptions.headers = rOptions.headers || {};
-                if (typeof rOptions.headers.connection !== 'string' || !upgradeHeader.test(rOptions.headers.connection)) {
-                    rOptions.headers.connection = 'close';
-                }
-            }
 
             proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
                 resolve(proxyRes);
@@ -80,6 +61,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
             var proxyRes = await proxyRequestPromise;
 
+
             var responseInterceptorPromise = new Promise((resolve, reject) => {
                 var next = () => {
                     resolve();
@@ -102,15 +84,21 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             }
 
             try {
-                // prevent duplicate set headers
-                if (!res.headersSent){
+
+                if (!res.headersSent){  // prevent duplicate set headers
                     Object.keys(proxyRes.headers).forEach(function(key) {
                         if(proxyRes.headers[key] != undefined){
-                            var newkey = key.replace(/^[a-z]|-[a-z]/g, (match) => {
-                                return match.toUpperCase()
-                            });
-                            var newkey = key;
-                            res.setHeader(newkey, proxyRes.headers[key]);
+                            // var key = key.replace(/^[a-z]|-[a-z]/g, (match) => {
+                            //     return match.toUpperCase()
+                            // });
+                            // https://github.com/nodejitsu/node-http-proxy/issues/362
+                            if (/^www-authenticate$/i.test(key)) {
+                                if (proxyRes.headers[key]) {
+                                    proxyRes.headers[key] = proxyRes.headers[key] && proxyRes.headers[key].split(',');
+                                }
+                                key = 'www-authenticate';
+                            }
+                            res.setHeader(key, proxyRes.headers[key]);
                         }
                     });
                     res.writeHead(proxyRes.statusCode);
