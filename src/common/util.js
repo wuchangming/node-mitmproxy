@@ -1,10 +1,11 @@
 const url = require('url');
-const Agent = require('agentkeepalive');
-const HttpsAgent = require('agentkeepalive').HttpsAgent;
+const Agent = require('./ProxyHttpAgent');
+const HttpsAgent = require('./ProxyHttpsAgent');
 
 var util = exports;
-var httpAgent =  new Agent();
 var httpsAgent = new HttpsAgent();
+var httpAgent = new Agent();
+var socketId = 0;
 
 util.getOptionsFormRequest = (req, ssl) => {
     var urlObject = url.parse(req.url);
@@ -15,14 +16,16 @@ util.getOptionsFormRequest = (req, ssl) => {
     delete headers['proxy-connection'];
     // keepAlive
     var agent = false;
-    if (headers.connection === 'keep-alive') {
+    if (headers.connection !== 'close') {
         if (protocol == 'https:') {
             agent = httpsAgent;
         } else {
             agent = httpAgent;
         }
+        headers.connection = 'keep-alive';
     }
-    return {
+
+    var options =  {
         protocol: protocol,
         hostname: req.headers.host.split(':')[0],
         method: req.method,
@@ -31,4 +34,14 @@ util.getOptionsFormRequest = (req, ssl) => {
         headers: req.headers,
         agent: agent
     }
+
+    // mark a socketId for Agent to bind socket for NTLM
+    if (req.socket.customSocketId) {
+        options.customSocketId = req.socket.customSocketId;
+    } else if (headers['www-authenticate']) {
+        options.customSocketId = req.socket.customSocketId = socketId++;
+    }
+
+    return options;
+
 }

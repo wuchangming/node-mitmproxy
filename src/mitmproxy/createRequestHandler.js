@@ -14,9 +14,10 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         var rOptions = commonUtil.getOptionsFormRequest(req, ssl);
 
-        if (typeof rOptions.headers.connection === 'string' && rOptions.headers.connection === 'close') {
+        if (rOptions.headers.connection === 'close') {
             req.socket.setKeepAlive(false);
-            console.log('req.socket.setKeepAlive(false);');
+        } else {
+            req.socket.setKeepAlive(true);
         }
 
         var requestInterceptorPromise = new Promise((resolve, reject) => {
@@ -36,18 +37,40 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         var proxyRequestPromise = new Promise((resolve, reject) => {
 
-            proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
-                resolve(proxyRes);
-            });
+            rOptions.host = rOptions.hostname || rOptions.host || 'localhost';
 
-            proxyReq.on('error', (e) => {
-                console.log(e);
-            })
+            // use the binded socket for NTLM
+            if (rOptions.agent && rOptions.customSocketId) {
+                var socketName = rOptions.agent.getName(rOptions)
+                var bindingSocket = rOptions.agent.sockets[socketName]
+                if (bindingSocket && bindingSocket.length > 0) {
+                    bindingSocket[0].once('free', onFree)
+                    return;
+                }
+            }
+            onFree()
+            function onFree() {
+                proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
+                    resolve(proxyRes);
+                });
 
-            req.on('aborted', function () {
-                proxyReq.abort();
-            });
-            req.pipe(proxyReq);
+                proxyReq.setTimeout(5 * 1000);
+
+                proxyReq.on('timeout', () => {
+                    reject(`${rOptions.host}:${rOptions.port}, request timeout`);
+                })
+
+                proxyReq.on('error', (e) => {
+                    reject(e);
+                })
+
+                req.on('aborted', function () {
+                    proxyReq.abort();
+                });
+                req.pipe(proxyReq);
+
+            }
+
         });
 
         // workflow control
@@ -84,13 +107,9 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
             }
 
             try {
-
                 if (!res.headersSent){  // prevent duplicate set headers
                     Object.keys(proxyRes.headers).forEach(function(key) {
                         if(proxyRes.headers[key] != undefined){
-                            // var key = key.replace(/^[a-z]|-[a-z]/g, (match) => {
-                            //     return match.toUpperCase()
-                            // });
                             // https://github.com/nodejitsu/node-http-proxy/issues/362
                             if (/^www-authenticate$/i.test(key)) {
                                 if (proxyRes.headers[key]) {
@@ -101,19 +120,24 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                             res.setHeader(key, proxyRes.headers[key]);
                         }
                     });
+
                     res.writeHead(proxyRes.statusCode);
                     proxyRes.pipe(res);
                 }
-
             } catch (e) {
-                console.error(e);
+                throw e;
             }
         })().then(
             (flag) => {
                 // do nothing
             },
             (e) => {
-                console.error(e.stack);
+                if (!res.finished) {
+                    res.writeHead (500);
+                    res.write(`Node-MitmProxy Warning:\n\n ${e.toString()}`);
+                    res.end();
+                }
+                console.error(e);
             }
         );
 
