@@ -22,7 +22,11 @@ module.exports = class FakeServersCenter {
     addServerPromise (serverPromiseObj) {
         if (this.queue.length >= this.maxLength) {
             var delServerObj = this.queue.shift();
-            delServerObj.server.close();
+            try {
+                delServerObj.serverObj.server.close();
+            } catch (e) {
+                console.log(e);
+            }
         }
         this.queue.push(serverPromiseObj);
         return serverPromiseObj;
@@ -71,6 +75,7 @@ module.exports = class FakeServersCenter {
                     server: fakeServer,
                     port: 0  // if prot === 0 ,should listen server's `listening` event.
                 }
+                serverPromiseObj.serverObj = serverObj;
                 fakeServer.listen(0, () => {
                     var address = fakeServer.address();
                     serverObj.port = address.port;
