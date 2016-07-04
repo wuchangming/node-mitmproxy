@@ -3,8 +3,16 @@ const Agent = require('./ProxyHttpAgent');
 const HttpsAgent = require('./ProxyHttpsAgent');
 
 var util = exports;
-var httpsAgent = new HttpsAgent();
-var httpAgent = new Agent();
+var httpsAgent = new HttpsAgent({
+  keepAlive: true,
+  timeout: 60000,
+  keepAliveTimeout: 30000 // free socket keepalive for 30 seconds
+});
+var httpAgent = new Agent({
+  keepAlive: true,
+  timeout: 60000,
+  keepAliveTimeout: 30000 // free socket keepalive for 30 seconds
+});
 var socketId = 0;
 
 util.getOptionsFormRequest = (req, ssl) => {
@@ -38,7 +46,7 @@ util.getOptionsFormRequest = (req, ssl) => {
     // mark a socketId for Agent to bind socket for NTLM
     if (req.socket.customSocketId) {
         options.customSocketId = req.socket.customSocketId;
-    } else if (headers['www-authenticate']) {
+    } else if (headers['authorization']) {
         options.customSocketId = req.socket.customSocketId = socketId++;
     }
 

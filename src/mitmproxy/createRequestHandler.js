@@ -16,73 +16,81 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
 
         if (rOptions.headers.connection === 'close') {
             req.socket.setKeepAlive(false);
+        } else if (rOptions.customSocketId != null) {  // for NTLM
+            req.socket.setKeepAlive(true, 60 * 60 * 1000);
         } else {
-            req.socket.setKeepAlive(true);
+            req.socket.setKeepAlive(true, 30000);
         }
 
-        var requestInterceptorPromise = new Promise((resolve, reject) => {
-            var next = () => {
-                resolve();
-            }
-            try {
-                if (typeof requestInterceptor === 'function') {
-                    requestInterceptor.call(null, rOptions, req, res, ssl, next);
-                } else {
+        var requestInterceptorPromise = () => {
+            return new Promise((resolve, reject) => {
+                var next = () => {
                     resolve();
                 }
-            } catch (e) {
-                reject(e);
-            }
-        });
-
-        var proxyRequestPromise = new Promise((resolve, reject) => {
-
-            rOptions.host = rOptions.hostname || rOptions.host || 'localhost';
-
-            // use the binded socket for NTLM
-            if (rOptions.agent && rOptions.customSocketId) {
-                var socketName = rOptions.agent.getName(rOptions)
-                var bindingSocket = rOptions.agent.sockets[socketName]
-                if (bindingSocket && bindingSocket.length > 0) {
-                    bindingSocket[0].once('free', onFree)
-                    return;
-                }
-            }
-            onFree()
-            function onFree() {
-                proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
-                    resolve(proxyRes);
-                });
-
-                proxyReq.setTimeout(5 * 1000);
-
-                proxyReq.on('timeout', () => {
-                    reject(`${rOptions.host}:${rOptions.port}, request timeout`);
-                })
-
-                proxyReq.on('error', (e) => {
+                try {
+                    if (typeof requestInterceptor === 'function') {
+                        requestInterceptor.call(null, rOptions, req, res, ssl, next);
+                    } else {
+                        resolve();
+                    }
+                } catch (e) {
                     reject(e);
-                })
+                }
+            });
+        }
 
-                req.on('aborted', function () {
-                    proxyReq.abort();
-                });
-                req.pipe(proxyReq);
+        var proxyRequestPromise = () => {
+            return new Promise((resolve, reject) => {
 
-            }
+                rOptions.host = rOptions.hostname || rOptions.host || 'localhost';
 
-        });
+                // use the binded socket for NTLM
+                if (rOptions.agent && rOptions.customSocketId != null) {
+                    var socketName = rOptions.agent.getName(rOptions)
+                    var bindingSocket = rOptions.agent.sockets[socketName]
+                    if (bindingSocket && bindingSocket.length > 0) {
+                        bindingSocket[0].once('free', onFree)
+                        return;
+                    }
+                }
+                onFree()
+                function onFree() {
+                    proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
+                        resolve(proxyRes);
+                    });
+
+                    proxyReq.on('timeout', () => {
+                        reject(`${rOptions.host}:${rOptions.port}, request timeout`);
+                    })
+
+                    proxyReq.on('error', (e) => {
+                        reject(e);
+                    })
+
+                    proxyReq.on('aborted', () => {
+                        req.abort();
+                    })
+
+                    req.on('aborted', function () {
+                        proxyReq.abort();
+                    });
+                    req.pipe(proxyReq);
+
+                }
+
+            });
+        }
 
         // workflow control
         (async () => {
 
-            await requestInterceptorPromise;
+            await requestInterceptorPromise();
 
             if (res.finished) {
                 return false;
             }
 
-            var proxyRes = await proxyRequestPromise;
+            var proxyRes = await proxyRequestPromise();
 
 
             var responseInterceptorPromise = new Promise((resolve, reject) => {
