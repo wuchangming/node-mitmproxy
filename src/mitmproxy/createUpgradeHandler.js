@@ -18,7 +18,7 @@ module.exports = function createUpgradeHandler() {
         });
         proxyReq.on('response', function (res) {
             // if upgrade event isn't going to happen, close the socket
-            if (!res.upgrade) socket.end();
+            if (!res.upgrade) cltSocket.end();
         });
 
         proxyReq.on('upgrade', function(proxyRes, proxySocket, proxyHead) {
@@ -58,7 +58,7 @@ module.exports = function createUpgradeHandler() {
 
         });
         proxyReq.end();
-        
+
     }
 
 }
