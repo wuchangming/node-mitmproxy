@@ -1,6 +1,6 @@
 {
   "name": "node-mitmproxy",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Node.js MITM Proxy",
   "main": "lib",
   "bin": "lib/bin/index.js",
@@ -42,7 +42,8 @@
     "lodash": "^4.7.0",
     "mkdirp": "^0.5.1",
     "node-forge": "^0.6.39",
-    "through2": "^2.0.1"
+    "through2": "^2.0.1",
+    "tunnel-agent": "^0.4.3"
   },
   "files": [
     "lib"
