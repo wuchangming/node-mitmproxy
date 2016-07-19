@@ -10,5 +10,6 @@ module.exports = {
     },
     responseInterceptor: (req, res, proxyReq, proxyRes, ssl, next) => {
         next();
-    }
+    },
+    externalProxy: 'http://127.0.0.1:9888'
 }

@@ -5,14 +5,14 @@ const commonUtil = require('../common/util');
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
 
 // create requestHandler function
-module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, plugins) {
+module.exports = function createRequestHandler(requestInterceptor, responseInterceptor, middlewares, externalProxy) {
 
     // return
     return function requestHandler(req, res, ssl) {
 
         var proxyReq;
 
-        var rOptions = commonUtil.getOptionsFormRequest(req, ssl);
+        var rOptions = commonUtil.getOptionsFormRequest(req, ssl, externalProxy);
 
         if (rOptions.headers.connection === 'close') {
             req.socket.setKeepAlive(false);
@@ -45,7 +45,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                 rOptions.host = rOptions.hostname || rOptions.host || 'localhost';
 
                 // use the binded socket for NTLM
-                if (rOptions.agent && rOptions.customSocketId != null) {
+                if (rOptions.agent && rOptions.customSocketId != null && rOptions.agent.getName) {
                     var socketName = rOptions.agent.getName(rOptions)
                     var bindingSocket = rOptions.agent.sockets[socketName]
                     if (bindingSocket && bindingSocket.length > 0) {
@@ -58,7 +58,6 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                     proxyReq = (rOptions.protocol == 'https:' ? https: http).request(rOptions, (proxyRes) => {
                         resolve(proxyRes);
                     });
-
                     proxyReq.on('timeout', () => {
                         reject(`${rOptions.host}:${rOptions.port}, request timeout`);
                     })
@@ -68,6 +67,7 @@ module.exports = function createRequestHandler(requestInterceptor, responseInter
                     })
 
                     proxyReq.on('aborted', () => {
+                        reject('server aborted reqest');
                         req.abort();
                     })
 

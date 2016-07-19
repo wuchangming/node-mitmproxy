@@ -39,11 +39,14 @@ module.exports = class CertAndKeyContainer {
         }
 
         let promise = new Promise((resolve, reject) => {
-
+            var once = true;
             var _resolve = (_certObj) => {
-                var mappingHostNames = tlsUtils.getMappingHostNamesFormCert(_certObj.cert);
-                certPromiseObj.mappingHostNames = mappingHostNames; // change
-                resolve(_certObj);
+                if (once) {
+                    once = false;
+                    var mappingHostNames = tlsUtils.getMappingHostNamesFormCert(_certObj.cert);
+                    certPromiseObj.mappingHostNames = mappingHostNames; // change
+                    resolve(_certObj);
+                }
             }
             let certObj;
             var preReq = https.request({
@@ -64,11 +67,11 @@ module.exports = class CertAndKeyContainer {
                     reject(e);
                 }
             });
-            preReq.on('socket', (socket) => {
-                socket.setTimeout(this.getCertSocketTimeout);
-                socket.on('timeout', function() {
-                    preReq.abort();
-                });
+            preReq.setTimeout(~~this.getCertSocketTimeout, () => {
+                if (!certObj) {
+                    certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                    _resolve(certObj);
+                }
             });
             preReq.on('error', (e) => {
                 if (!certObj) {

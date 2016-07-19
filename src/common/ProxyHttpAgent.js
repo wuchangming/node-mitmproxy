@@ -1,6 +1,7 @@
 var AgentOrigin = require('agentkeepalive');
 
 module.exports = class Agent extends AgentOrigin{
+    // Hacky
     getName (option) {
         var name = AgentOrigin.prototype.getName.call(this, option);
         name += ':';

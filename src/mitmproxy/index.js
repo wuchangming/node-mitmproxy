@@ -16,15 +16,13 @@ module.exports = {
         sslConnectInterceptor,
         requestInterceptor,
         responseInterceptor,
-        getCertSocketTimeout,
-        rejectUnauthorized = false,
-        plugins = []
+        getCertSocketTimeout = 1 * 1000,
+        middlewares = [],
+        externalProxy
     }) {
 
         // Don't reject unauthorized
-        if (!rejectUnauthorized) {
-            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
-        }
+        process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 
         if (!caCertPath && !caKeyPath) {
             var rs = this.createCA();
@@ -40,7 +38,8 @@ module.exports = {
         var requestHandler = createRequestHandler(
             requestInterceptor,
             responseInterceptor,
-            plugins
+            middlewares,
+            externalProxy
         );
 
         var upgradeHandler = createUpgradeHandler();
