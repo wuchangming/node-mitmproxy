@@ -52,7 +52,7 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
         agent: agent
     }
 
-    if (protocol === 'http:' && (url.parse(externalProxy)).protocol === 'http:') {
+    if (protocol === 'http:' && externalProxy && (url.parse(externalProxy)).protocol === 'http:') {
         var externalURL = url.parse(externalProxy)
         options.hostname = externalURL.hostname;
         options.port = externalURL.port;
