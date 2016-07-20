@@ -56,6 +56,8 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
         var externalURL = url.parse(externalProxy)
         options.hostname = externalURL.hostname;
         options.port = externalURL.port;
+        // support non-transparent proxy
+        options.path = `http://${urlObject.host}${urlObject.path}`;
     }
 
     // mark a socketId for Agent to bind socket for NTLM
