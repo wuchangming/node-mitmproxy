@@ -6,7 +6,7 @@
   "bin": "lib/bin/index.js",
   "scripts": {
     "test": "npm run build && jest",
-    "test-coveralls": "npm run build && jest --coverage && && cat ./coverage/lcov.info | coveralls",
+    "test-coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
     "build": "rm -rf lib && babel src -d lib",
     "dev": "rm -rf lib && babel -w src -d lib",
     "prepublish": "npm run build"
