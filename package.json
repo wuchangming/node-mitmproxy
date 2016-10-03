@@ -5,7 +5,7 @@
   "main": "lib",
   "bin": "lib/bin/index.js",
   "scripts": {
-    "test": "node ./test/ConfigTestCases.test.js",
+    "test": "npm run build && jest",
     "build": "rm -rf lib && babel src -d lib",
     "dev": "rm -rf lib && babel -w src -d lib",
     "prepublish": "npm run build"
