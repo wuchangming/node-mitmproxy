@@ -1,5 +1,6 @@
 # node-mitmproxy 3.x
-Rebuild with `async/await` and `Promise`
+
+**`PS: NEW VERSION [4.X](https://github.com/wuchangming/node-mitmproxy/tree/4.x) IS BLEEDING BUILDING NOW!!`**
 
 [![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)  
 node-mitmproxy是一个基于nodejs，支持http/https的中间人(MITM)代理，便于渗透测试和开发调试。
