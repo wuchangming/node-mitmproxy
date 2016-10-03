@@ -2,7 +2,7 @@
 `node-mitmproxy` is an extensible [man-in-the-middle](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) proxy for HTTP/HTTPS base on Node.js.
 
 [![npm](https://img.shields.io/npm/dt/node-mitmproxy.svg)](https://www.npmjs.com/package/node-mitmproxy)
-[![Build Status](https://travis-ci.org/wuchangming/node-mitmproxy.svg?branch=master)](https://travis-ci.org/wuchangming/node-mitmproxy)
+[![Build Status](https://travis-ci.org/wuchangming/node-mitmproxy.svg?branch=4.x)](https://travis-ci.org/wuchangming/node-mitmproxy)
 [![Coverage Status](https://coveralls.io/repos/github/wuchangming/node-mitmproxy/badge.svg?branch=master)](https://coveralls.io/github/wuchangming/node-mitmproxy?branch=master)  
 ## Features
 * Support HTTP and HTTPS
