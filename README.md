@@ -107,6 +107,9 @@ options.caCertPath
 default: %HOMEPATH%/.node-mitmproxy/node-mitmproxy.ca.crt
 ```
 
+options.createFakeCertBaseOnOrigin
+-----------
+
 options.silence
 -----------
 ```

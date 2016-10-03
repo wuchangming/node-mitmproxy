@@ -3,9 +3,12 @@ const logger = require('../logger');
 const http = reuqire('http');
 
 
-const DEFAULT_PORT = config.DEFAULT_PORT;
-const DEFAULT_CA_CERT_PATH = config.DEFAULT_CA_CERT_PATH;
-const DEFAULT_CA_KEY_PATH = config.DEFAULT_CA_KEY_PATH;
+const {
+    DEFAULT_PORT,
+    DEFAULT_CA_CERT_PATH,
+    DEFAULT_CA_KEY_PATH,
+    DEFAULT_OUTPUT_CERT_FILES_PATH
+} = config;
 
 exports = mitmproxy;
 
@@ -18,12 +21,13 @@ exports = mitmproxy;
  *   caCertPath
  *   caKeyPath
  *   ssl
- *   middlewares
  *   externalProxy
+ *   mapLocalList
+ *   middlewares
  *   sslConnectInterceptor
  *   requestInterceptor
  *   responseInterceptor
- *   mapLocalList
+ *   createFakeCertBaseOnOrigin
  *   silence
  *   outputCertFiles
  *   outputCertFilesPath
@@ -37,6 +41,7 @@ mitmproxy.createProxy = function (options) {
         caCertPath: DEFAULT_CA_CERT_PATH,
         caKeyPath: DEFAULT_CA_KEY_PATH,
         ssl: false,
+        createFakeCertBaseOnOrigin: true,
         silence: false,
         outputCertFiles: false,
         outputCertFilesPath: DEFAULT_OUTPUT_CERT_FILES_PATH

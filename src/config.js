@@ -18,3 +18,11 @@ config.DEFAULT_CA_CERT_PATH = path.resolve(config.getDefaultCABasePath(), caCert
 config.DEFAULT_CA_KEY_PATH = path.resolve(config.getDefaultCABasePath(), caKeyFileName);
 
 config.DEFAULT_OUTPUT_CERT_FILES_PATH = path.resolve(config.getDefaultCABasePath(), 'cert');
+
+config.LOCAL_IP = '127.0.0.1';
+
+config.MIDDLEWARE_API_sslConnectInterceptor = 'sslConnectInterceptor';
+
+config.MIDDLEWARE_API_requestInterceptor = 'requestInterceptor';
+
+config.MIDDLEWARE_API_responseInterceptor = 'responseInterceptor';
