@@ -1,4 +1,5 @@
 const fs = require('fs');
+const url = require('url');
 
 module.exports = {
     sslConnectInterceptor: (req, cltSocket, head) => true,
@@ -11,5 +12,13 @@ module.exports = {
     responseInterceptor: (req, res, proxyReq, proxyRes, ssl, next) => {
         next();
     },
-    externalProxy: 'http://127.0.0.1:8888'
+    externalProxy: (req, ssl) => {
+        var headers = req.headers;
+        console.log(headers);
+        if (headers['upgrade'] && headers['upgrade'] === 'mmtls') {
+            return ''
+        } else {
+            return 'http://127.0.0.1:8888'
+        }
+    }
 }
