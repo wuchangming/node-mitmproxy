@@ -25,10 +25,23 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
     var defaultPort = ssl ? 443 : 80;
     var protocol = ssl ? 'https:' : 'http:';
     var headers = Object.assign({}, req.headers);
+    var externalProxyUrl = null
+
+    if (externalProxy) {
+        if (typeof externalProxy === 'string') {
+            externalProxyUrl = externalProxy
+        } else if (typeof externalProxy === 'function') {
+            try {
+                externalProxyUrl = externalProxy(req, ssl)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
 
     delete headers['proxy-connection'];
     var agent = false;
-    if (!externalProxy) {
+    if (!externalProxyUrl) {
         // keepAlive
         if (headers.connection !== 'close') {
             if (protocol == 'https:') {
@@ -39,7 +52,7 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
             headers.connection = 'keep-alive';
         }
     } else {
-        agent = util.getTunnelAgent(protocol === 'https:', externalProxy);
+        agent = util.getTunnelAgent(protocol === 'https:', externalProxyUrl);
     }
 
     var options =  {
@@ -52,8 +65,8 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
         agent: agent
     }
 
-    if (protocol === 'http:' && externalProxy && (url.parse(externalProxy)).protocol === 'http:') {
-        var externalURL = url.parse(externalProxy)
+    if (protocol === 'http:' && externalProxyUrl && (url.parse(externalProxyUrl)).protocol === 'http:') {
+        var externalURL = url.parse(externalProxyUrl)
         options.hostname = externalURL.hostname;
         options.port = externalURL.port;
         // support non-transparent proxy
@@ -71,8 +84,8 @@ util.getOptionsFormRequest = (req, ssl, externalProxy = null) => {
 
 }
 
-util.getTunnelAgent = (requestIsSSL, externalProxy) => {
-    var urlObject = url.parse(externalProxy);
+util.getTunnelAgent = (requestIsSSL, externalProxyUrl) => {
+    var urlObject = url.parse(externalProxyUrl);
     var protocol = urlObject.protocol || 'http:';
     var port = urlObject.port;
     if (!port) {
