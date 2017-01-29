@@ -76,7 +76,6 @@ utils.createFakeCertificateByDomain = function (caKey, caCert, domain) {
     cert.validity.notBefore.setFullYear(cert.validity.notBefore.getFullYear() - 1);
     cert.validity.notAfter = new Date();
     cert.validity.notAfter.setFullYear(cert.validity.notAfter.getFullYear() + 1);
-    console.log(domain);
     var attrs = [{
       name: 'commonName',
       value: domain
