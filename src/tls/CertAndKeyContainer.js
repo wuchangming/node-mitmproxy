@@ -58,7 +58,11 @@ module.exports = class CertAndKeyContainer {
                 try {
                     var realCert  = preRes.socket.getPeerCertificate();
                     if (realCert) {
-                        certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        try {
+                            certObj = tlsUtils.createFakeCertificateByCA(this.caKey, this.caCert, realCert);
+                        } catch (error) {
+                            certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
+                        }
                     } else {
                         certObj = tlsUtils.createFakeCertificateByDomain(this.caKey, this.caCert, hostname);
                     }
