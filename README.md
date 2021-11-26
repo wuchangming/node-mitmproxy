@@ -115,12 +115,12 @@ mitmproxy.createProxy({
 
 1、clientReq: 客户端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
 2、clientRes: 客户端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
-3、proxyRes: 服务端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
+3、proxyReq: 服务端请求，参考[http.IncomingMessage](https://nodejs.org/api/http.html#http_class_http_incomingmessage)  
 4、proxyRes: 服务端响应，参考[http.ServerResponse](https://nodejs.org/api/http.html#http_class_http_serverresponse)  
 5、ssl: 该请求是否为https  
 6、next: 回调函数，执行完拦截逻辑后调用该方法  
 ```
-    responseInterceptor: (clientReq, clientRes, proxyRes, proxyRes, ssl, next) => {
+    responseInterceptor: (clientReq, clientRes, proxyReq, proxyRes, ssl, next) => {
         next();
     }
 ```
